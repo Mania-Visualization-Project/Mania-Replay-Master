@@ -9,16 +9,41 @@ import java.io.IOException
 
 object Main {
 
-    val BEAT_MAP = "C:\\Users\\22428\\Desktop\\1061136 osu!mania 7K Dan Course - Dan Phase IV\\osu!mania 7K Dan Course - Dan Phase IV (Jinjin) [Stellium Dan (Left)].osu"
-    val REPLAY = "G:\\E\\CaOH2 - osu!mania 7K Dan Course - Dan Phase IV [Stellium Dan (Left 1234)] (2019-12-24) OsuMania.osr"
     @Throws(IOException::class, CompressorException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val beatMap = OsuConverter.fromBeatMap(BEAT_MAP)
-        val replayData = ReplayData(ReplayReader(File(REPLAY)).parse())
+        if (args.size != 2) {
+            println("Error argument number: ${args.size}")
+            println("Arguments format: [beatmap.osu] [replay.osr]")
+            return
+        }
+
+        print("Read beatmap: ${args[0]} ... ")
+        val beatMap = OsuConverter.fromBeatMap(args[0])
+        println("Success!")
+
+        print("Read replay: ${args[1]} ... ")
+        val replayData = ReplayData(ReplayReader(File(args[1])).parse())
+        println("Success!")
+
+        print("Parse replay ... ")
         replayData.parse()
         val replayNotes = OsuConverter.fromReplay(replayData, beatMap.key)
+        println("Success!")
+
+        print("Generate judgement ... ")
         ReplayMaster.judge(beatMap, replayNotes)
-        ReplayMaster.render(beatMap, replayNotes, File("out.avi").absolutePath)
+        println("Success!")
+
+        println("Begin rendering ...")
+        val outFile = File("out.avi").absolutePath
+        val tempFile = File("temp.avi").absolutePath
+        ReplayMaster.render(beatMap, replayNotes, tempFile)
+
+        println("Begin attaching BGM ...")
+        ReplayMaster.attachBgm(beatMap, tempFile, outFile)
+
+        println("Render success! Output file is: $outFile")
+//        File(tempFile).delete()
     }
 }

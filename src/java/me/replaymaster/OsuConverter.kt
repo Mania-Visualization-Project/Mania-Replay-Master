@@ -22,14 +22,26 @@ object OsuConverter {
     }
 
     fun fromBeatMap(path: String): BeatMap {
-        val inputStream: InputStream = File(path).inputStream()
+        val inputFile = File(path)
+        val inputStream: InputStream = inputFile.inputStream()
         var find = false
         var key = -1
         var od = 0.0
+        var bgmFile = ""
         val list = inputStream.bufferedReader().lines().filter {
             when {
-                it.startsWith("CircleSize") -> key = it.split(":").last().toInt()
-                it.startsWith("OverallDifficulty") -> od = it.split(":").last().toDouble()
+                it.startsWith("CircleSize") -> {
+                    key = it.split(":").last().toInt()
+                    println(">>>> read key: $key")
+                }
+                it.startsWith("OverallDifficulty") -> {
+                    od = it.split(":").last().toDouble()
+                    println(">>>> read od: $od")
+                }
+                it.startsWith("AudioFilename") -> {
+                    bgmFile = File(inputFile.parent, it.split(":").last().trim()).absolutePath
+                    println(">>>> read bgm: $bgmFile")
+                }
                 it.startsWith("[") -> {
                     find = it == "[HitObjects]"
                     return@filter false
@@ -47,11 +59,10 @@ object OsuConverter {
                 }
                 .toList()
         inputStream.close()
-        return BeatMap(key, getJudgement(od), list.sorted())
+        return BeatMap(key, getJudgement(od), list.sorted(), bgmFile)
     }
 
     fun fromReplay(replayData: ReplayData, key: Int): List<Note> {
-        val fos = FileOutputStream(File("left.txt"))
         var current: Long = 0
         val holdBeginTime = Array<Long>(key) { 0 }
         val list = arrayListOf<Note>()
@@ -70,12 +81,10 @@ object OsuConverter {
                         holdBeginTime[j] = 0L
                     }
                 }
-//                fos.write("$x $j ${x and 1} $current\n".toByteArray())
                 x /= 2
             }
         }
         list.sort()
-        fos.close()
         return list
     }
 }
