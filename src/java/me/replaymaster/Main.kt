@@ -6,6 +6,7 @@ import org.apache.commons.compress.compressors.CompressorException
 import java.io.File
 
 import java.io.IOException
+import java.lang.Exception
 
 object Main {
 
@@ -36,14 +37,25 @@ object Main {
         println("Success!")
 
         println("Begin rendering ...")
-        val outFile = File("out.avi").absolutePath
-        val tempFile = File("temp.avi").absolutePath
-        ReplayMaster.render(beatMap, replayNotes, tempFile)
+        val outFile = File("out.avi")
+        val tempFile = File("temp.avi")
+        if (outFile.exists()) {
+            outFile.delete()
+        }
+        ReplayMaster.render(beatMap, replayNotes, tempFile.absolutePath)
 
         println("Begin attaching BGM ...")
-        ReplayMaster.attachBgm(beatMap, tempFile, outFile)
+        try {
+            ReplayMaster.attachBgm(beatMap, tempFile, outFile)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
 
-        println("\nRender success! Output file is: $outFile")
-//        File(tempFile).delete()
+        if (!outFile.exists()) {
+            println("Error: cannot attach BGM to video. Please check if ffmpeg is in the \$PATH\$.")
+            tempFile.copyTo(outFile, true)
+        }
+        println("\nRender success! Output file is: ${outFile.absolutePath}")
+        tempFile.delete()
     }
 }

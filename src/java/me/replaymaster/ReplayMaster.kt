@@ -3,6 +3,7 @@ package me.replaymaster
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.util.*
 import kotlin.math.abs
@@ -73,17 +74,17 @@ object ReplayMaster {
     }
 
     @JvmStatic
-    fun attachBgm(beatMap: BeatMap, videoFile: String, outFile: String, ffmpegPath: String="ffmpeg") {
+    fun attachBgm(beatMap: BeatMap, videoFile: File, outFile: File, ffmpegPath: String = "ffmpeg") {
         println("FFmpeg path: $ffmpegPath")
 
         val ffmpeg = ProcessBuilder()
                 .command(listOf(
                         ffmpegPath,
-                        "-i", videoFile,
+                        "-i", videoFile.absolutePath,
                         "-i", beatMap.bgmPath,
                         "-f", "avi",
                         "-y",
-                        outFile
+                        outFile.absolutePath
                 ))
                 .redirectErrorStream(true)
                 .start()

@@ -81,7 +81,7 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
         }
         Scalar color = getJudgementColor(note.judgement);
         rectangle(image, Point(x, y), Point(x + width, y - h),
-                  color, isBase ? 2 : FILLED);
+                  color, isBase ? 3 : FILLED);
     }
     return beginIndex;
 }
