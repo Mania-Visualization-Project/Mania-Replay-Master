@@ -1,0 +1,7 @@
+*.avi
+out
+cmake-build-debug
+src/cpp/.idea
+*.dll
+workspace.xml
+uiDesigner.xml
