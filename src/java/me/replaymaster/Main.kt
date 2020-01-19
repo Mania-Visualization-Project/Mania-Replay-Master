@@ -39,7 +39,7 @@ object Main {
         }
 
         print("Generate judgement ... ")
-        ReplayMaster.judge(beatMap, replayModel)
+        ReplayMaster.judge(beatMap, replayModel, true)
         println("Success!")
 
         println("Begin rendering ...")

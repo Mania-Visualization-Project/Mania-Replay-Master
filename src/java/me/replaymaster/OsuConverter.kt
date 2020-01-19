@@ -61,8 +61,8 @@ object OsuConverter {
                     val elements = it.split(",")
                     val column = floor(elements[0].toInt() * key / 512.0).toInt()
                     val timeStamp = elements[2].toLong()
-                    val endTime = elements[4].toInt()
-                    val duration = if (endTime != 0) endTime - timeStamp else 0
+                    val endTime = elements[5].split(":")[0].toLong()
+                    val duration = if (elements[3].toInt() and 128 != 0) endTime - timeStamp else 0L
                     Note(timeStamp, column, duration)
                 }
                 .toList()
@@ -108,7 +108,7 @@ object OsuConverter {
             Mods.has(replayData.replay.mods, Mods.HalfTime) -> 0.75
             else -> 1.0
         }
-        println(">>>> read rate: $rate")
+        println(">>>> read rate: x$rate")
         return ReplayModel(list, rate)
     }
 }

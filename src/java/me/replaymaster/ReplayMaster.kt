@@ -16,13 +16,33 @@ object ReplayMaster {
         System.loadLibrary("librender")
     }
 
+    private fun judgeNote(base: Note, action: Note, judgementTime: DoubleArray, start: Boolean = true) {
+        base.setJudgement(-1, start)
+        action.setJudgement(-1, start)
+        val diff = if (start) {
+            abs(base.timeStamp - action.timeStamp)
+        } else {
+            abs(base.endTime - action.endTime)
+        }
+
+        for (i in 0..judgementTime.lastIndex) {
+            if (diff <= judgementTime[i]) {
+                base.setJudgement(i, start)
+                action.setJudgement(i, start)
+                break
+            }
+        }
+    }
+
     @JvmStatic
-    fun judge(beatMap: BeatMap, replay: ReplayModel) {
+    fun judge(beatMap: BeatMap, replay: ReplayModel, judgeLn: Boolean) {
         val unjudgeNotes = LinkedList<Note>(beatMap.notes)
         for (action in replay.replayData) {
 
             var targetNote: Note? = null
             var minDiff = Long.MAX_VALUE
+            val oldDuration = action.duration
+            action.duration = 0 // mark rice
 
             for (note in unjudgeNotes) {
                 if (note.column != action.column) continue
@@ -43,16 +63,14 @@ object ReplayMaster {
 
                 unjudgeNotes.remove(targetNote)
 
-                targetNote.judgement = -1
-                action.judgement = -1
-                for (i in 0..beatMap.judgementTime.lastIndex) {
-                    if (minDiff <= beatMap.judgementTime[i]) {
-                        targetNote.judgement = i
-                        action.judgement = i
-                        break
+                judgeNote(targetNote, action, beatMap.judgementTime)
+
+                if (targetNote.duration > 0) { // LN
+                    action.duration = oldDuration
+                    if (judgeLn) {
+                        judgeNote(targetNote, action, beatMap.judgementTime, false)
                     }
                 }
-//                println(action.judgement)
             }
         }
     }
@@ -84,7 +102,7 @@ object ReplayMaster {
                         "-i", videoFile.absolutePath,
                         "-i", beatMap.bgmPath,
                         "-filter:a", "atempo=$rate",
-                        "-f", "avi",
+                        "-c:v", "copy",
                         "-y",
                         outFile.absolutePath
                 ))

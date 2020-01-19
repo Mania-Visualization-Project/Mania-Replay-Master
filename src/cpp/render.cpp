@@ -4,11 +4,12 @@
 #include "me_replaymaster_ReplayMaster.h"
 
 #define FPS 60
-#define PIXEL_PER_FRAME (900 / FPS)
-#define MIN_LN_TIME 150
+#define PIXEL_PER_FRAME (900.0 / FPS)
 #define BLOCK_HEIGHT 40
 #define GAME_WIDTH 540
 #define GAME_HEIGHT 960
+#define ACTION_HEIGHT 5
+#define COLLUMN_PADDING_RATIO 0.1
 #define TIME_INTERVAL (1000.0 / FPS)
 #define TIME_WINDOW ((double) GAME_HEIGHT / PIXEL_PER_FRAME * TIME_INTERVAL)
 #define TIME_TO_HEIGHT(t) ((int)(((double) (t)) / TIME_WINDOW * GAME_HEIGHT))
@@ -21,26 +22,27 @@ using namespace std;
 struct Note {
     long timeStamp;
     int column;
-    int duration;
-    int judgement;
+    long duration;
+    int judgementStart;
+    int judgementEnd;
 
     inline long getEndTime() {
         return timeStamp + duration;
     }
 
-    Note(long timeStamp, int column, int duration, int judgement) : timeStamp(timeStamp),
-                                                                    column(column),
-                                                                    duration(duration),
-                                                                    judgement(judgement) {}
+    Note(long timeStamp, int column, int duration, int judgementStart, int judgementEnd)
+            : timeStamp(timeStamp), column(column), duration(duration),
+              judgementStart(judgementStart), judgementEnd(judgementEnd) {}
 };
 
 void readNote(istream &stream, vector<Note> &vector) {
     long timeStamp;
     int column;
-    int duration;
-    int judgement;
-    stream >> timeStamp >> column >> duration >> judgement;
-    vector.emplace_back(timeStamp, column, duration, judgement);
+    long duration;
+    int judgementStart;
+    int judgementEnd;
+    stream >> timeStamp >> column >> duration >> judgementStart >> judgementEnd;
+    vector.emplace_back(timeStamp, column, duration, judgementStart, judgementEnd);
 }
 
 inline Scalar getJudgementColor(int judgement) {
@@ -62,26 +64,54 @@ inline Scalar getJudgementColor(int judgement) {
 
 int columnWidth = 0;
 
+void renderNote(Mat &image, Note &note, double time, bool isBase, int judgement) {
+    int x = (int) (note.column * columnWidth);
+    int y = TIME_TO_HEIGHT(time);
+    int h = MAX(BLOCK_HEIGHT, TIME_TO_HEIGHT(note.duration));
+    int width = columnWidth;
+    if (!isBase) {
+        h = ACTION_HEIGHT;
+        x += width / 5;
+        width -= 2 * width / 5;
+    }
+    if (y - h < 0) h = y;
+    Scalar color = getJudgementColor(judgement);
+    x += columnWidth * COLLUMN_PADDING_RATIO;
+    width -= 2 * columnWidth * COLLUMN_PADDING_RATIO;
+    rectangle(image, Point(x, y), Point(x + width, y - h),
+              color, isBase ? 3 : FILLED);
+}
+
+void renderActionLN(Mat &image, Note &note, double currentTime) {
+    int width = ACTION_HEIGHT / 2;
+    int x = (int) (note.column * columnWidth) + columnWidth / 2;
+    int y = TIME_TO_HEIGHT(currentTime - note.timeStamp);
+    int h = TIME_TO_HEIGHT(note.duration);
+    if (y < h) h = y;
+    Scalar color(50, 50, 50);
+    for (int currentH = ACTION_HEIGHT * 2; currentH + ACTION_HEIGHT <= h; currentH += ACTION_HEIGHT * 2) {
+        rectangle(image,
+                  Point(x - width, y - currentH),
+                  Point(x + width, y - currentH - ACTION_HEIGHT),
+                  color, -1);
+    }
+}
+
 int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isBase) {
     const int dataSize = data.size();
     for (int i = beginIndex; i < dataSize && data[i].timeStamp <= time; i++) {
         auto &note = data[i];
-        if (time - note.timeStamp > TIME_WINDOW) {
-            beginIndex = i + 1;
+        if (TIME_TO_HEIGHT(time - note.getEndTime()) > GAME_HEIGHT) {
+//            beginIndex = i + 1;
             continue;
         }
-        int x = (int) (note.column * columnWidth);
-        int y = TIME_TO_HEIGHT(time - note.timeStamp);
-        int h = MIN(BLOCK_HEIGHT, TIME_TO_HEIGHT(MAX(note.duration, MIN_LN_TIME)));
-        int width = columnWidth;
-        if (!isBase) {
-            h = 5;
-            x += width / 5;
-            width -= 2 * width / 5;
+        renderNote(image, note, time - note.timeStamp, isBase, note.judgementStart);
+
+        if (!isBase && note.duration != 0) { // hold LN, render end
+            renderNote(image, note, time - note.getEndTime(), false,
+                       note.judgementEnd);
+            renderActionLN(image, note, time);
         }
-        Scalar color = getJudgementColor(note.judgement);
-        rectangle(image, Point(x, y), Point(x + width, y - h),
-                  color, isBase ? 3 : FILLED);
     }
     return beginIndex;
 }
@@ -105,7 +135,7 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
     auto path = env->GetStringUTFChars(jPath, JNI_FALSE);
 
     Size imageSize(GAME_WIDTH, GAME_HEIGHT);
-    VideoWriter writer(string(path), VideoWriter::fourcc('P', 'I', 'M', '1'), FPS, imageSize);
+    VideoWriter writer(string(path), VideoWriter::fourcc('D', 'I', 'V', 'X'), FPS, imageSize);
     Mat image(imageSize, TYPE_IMAGE);
     Mat dark(imageSize, TYPE_IMAGE, Scalar::all(0));
     vector<Note> beats;
