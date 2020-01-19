@@ -11,13 +11,13 @@ Currently the project only supports Osu!Mania replay visualization.
 ## 截图 Screenshot
 
 - Lynessa's Jack Collection [Uetso Shi - Firmament Castle Velier]
-![](\screenshot\image3.png)
+![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image3.png?raw=true)
 
 - YELL! [Colorful Smile] + DT
-![](\screenshot\image1.png)
+![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image1.png?raw=true)
 
 - Mario Paint (Time Regression Mix for BMS) [D-ANOTHER]
-![](\screenshot\image2.png)
+![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image2.png?raw=true)
 
 
 ## 使用方法 Usage
@@ -47,13 +47,16 @@ The project depends on the following tools:
 IntelliJ IDEA and CLion are recommended for compilation. Here the compiling platform is Windows 10, and the other systems can be compiled refer to follows.
 
 - 进入src/cpp目录，使用CMake将JNI编译为librender.dll。可能需要修改OpenCV和JDK依赖目录。
-Go to src/cpp, use CMake to compile JNI codes to librender.dll. You may need to modify the OpenCV and JDK dependency directories.
 
 - 将编译后的库文件librender.dll复制到lib/
-Copy the library file librender.dll to lib/
 
 - 编译Kotlin代码为ManiaReplayMaster.jar
-Compile the Kotlin codes as ManiaReplayMaster.jar
+
+- Go to src/cpp, use CMake to compile JNI codes to librender.dll. You may need to modify the OpenCV and JDK dependency directories.
+
+- Copy the library file librender.dll to lib/
+
+- Compile the Kotlin codes as ManiaReplayMaster.jar
 
 使用方法 Usage:
 
