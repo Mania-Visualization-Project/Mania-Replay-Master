@@ -11,12 +11,15 @@ Currently the project only supports Osu!Mania replay visualization.
 ## 截图 Screenshot
 
 - Lynessa's Jack Collection [Uetso Shi - Firmament Castle Velier]
+
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image3.png?raw=true)
 
 - YELL! [Colorful Smile] + DT
+
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image1.png?raw=true)
 
 - Mario Paint (Time Regression Mix for BMS) [D-ANOTHER]
+
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image2.png?raw=true)
 
 
