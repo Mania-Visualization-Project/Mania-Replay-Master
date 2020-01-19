@@ -19,21 +19,27 @@ object Main {
             return
         }
 
-        println("Read beatmap: ${args[0]} ... ")
-        val beatMap = OsuConverter.fromBeatMap(args[0])
-        println("Success!")
-
         print("Read replay: ${args[1]} ... ")
         val replayData = ReplayData(ReplayReader(File(args[1])).parse())
+        replayData.parse()
         println("Success!")
 
-        print("Parse replay ... ")
-        replayData.parse()
-        val replayNotes = OsuConverter.fromReplay(replayData, beatMap.key)
+        println("Read beatmap: ${args[0]} ... ")
+        val beatMap = OsuConverter.fromBeatMap(args[0], replayData)
         println("Success!")
+
+        println("Parse replay ... ")
+        val replayModel = OsuConverter.fromReplay(replayData, beatMap.key)
+        println("Success!")
+
+        if (replayModel.rate != 1.0) {
+            print("Scale rate to ${replayModel.rate}... ")
+            OsuConverter.scaleRate(replayModel, beatMap)
+            println("Success!")
+        }
 
         print("Generate judgement ... ")
-        ReplayMaster.judge(beatMap, replayNotes)
+        ReplayMaster.judge(beatMap, replayModel)
         println("Success!")
 
         println("Begin rendering ...")
@@ -42,11 +48,11 @@ object Main {
         if (outFile.exists()) {
             outFile.delete()
         }
-        ReplayMaster.render(beatMap, replayNotes, tempFile.absolutePath)
+        ReplayMaster.render(beatMap, replayModel, tempFile.absolutePath)
 
         println("Begin attaching BGM ...")
         try {
-            ReplayMaster.attachBgm(beatMap, tempFile, outFile)
+            ReplayMaster.attachBgm(beatMap, tempFile, outFile, replayModel.rate)
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -55,6 +61,7 @@ object Main {
             println("Error: cannot attach BGM to video. Please check if ffmpeg is in the \$PATH\$.")
             tempFile.copyTo(outFile, true)
         }
+
         println("\nRender success! Output file is: ${outFile.absolutePath}")
         tempFile.delete()
     }

@@ -2,9 +2,10 @@ package me.replaymaster
 
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
+import me.replaymaster.model.ReplayModel
+import me.replays.Mods
 import me.replays.ReplayData
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import kotlin.math.floor
 import kotlin.streams.toList
@@ -12,16 +13,22 @@ import kotlin.streams.toList
 object OsuConverter {
 
     private val BASE_JUDGEMENT_OFFSET = doubleArrayOf(16.5, 64.5, 97.5, 127.5, 151.5)
+    private val BASE_JUDGEMENT_OFFSET_DT = doubleArrayOf(16.33, 64.33, 97.0, 127.0, 151.0)
+    private val BASE_JUDGEMENT_OFFSET_HT = doubleArrayOf(16.67, 64.67, 96.67, 127.33, 151.33)
 
-    private fun getJudgement(od: Double): DoubleArray {
-        val result = BASE_JUDGEMENT_OFFSET.copyOf()
+    private fun getJudgement(od: Double, replayData: ReplayData): DoubleArray {
+        val result = when {
+            Mods.has(replayData.replay.mods, Mods.DoubleTime) -> BASE_JUDGEMENT_OFFSET_DT
+            Mods.has(replayData.replay.mods, Mods.HalfTime) -> BASE_JUDGEMENT_OFFSET_HT
+            else -> BASE_JUDGEMENT_OFFSET
+        }.copyOf()
         for (i in 1..4) {
             result[i] -= 3 * od
         }
         return result
     }
 
-    fun fromBeatMap(path: String): BeatMap {
+    fun fromBeatMap(path: String, replayData: ReplayData): BeatMap {
         val inputFile = File(path)
         val inputStream: InputStream = inputFile.inputStream()
         var find = false
@@ -60,10 +67,20 @@ object OsuConverter {
                 }
                 .toList()
         inputStream.close()
-        return BeatMap(key, getJudgement(od), list.sorted(), bgmFile)
+        return BeatMap(key, getJudgement(od, replayData), list.sorted(), bgmFile)
     }
 
-    fun fromReplay(replayData: ReplayData, key: Int): List<Note> {
+    fun scaleRate(replayModel: ReplayModel, beatMap: BeatMap) {
+        val rate = replayModel.rate
+        replayModel.replayData.forEach {
+            it.scale(rate)
+        }
+        beatMap.notes.forEach {
+            it.scale(rate)
+        }
+    }
+
+    fun fromReplay(replayData: ReplayData, key: Int): ReplayModel {
         var current: Long = 0
         val holdBeginTime = Array<Long>(key) { 0 }
         val list = arrayListOf<Note>()
@@ -86,6 +103,12 @@ object OsuConverter {
             }
         }
         list.sort()
-        return list
+        val rate = when {
+            Mods.has(replayData.replay.mods, Mods.DoubleTime) -> 1.5
+            Mods.has(replayData.replay.mods, Mods.HalfTime) -> 0.75
+            else -> 1.0
+        }
+        println(">>>> read rate: $rate")
+        return ReplayModel(list, rate)
     }
 }

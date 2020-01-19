@@ -2,6 +2,7 @@ package me.replaymaster
 
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
+import me.replaymaster.model.ReplayModel
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -16,9 +17,9 @@ object ReplayMaster {
     }
 
     @JvmStatic
-    fun judge(beatMap: BeatMap, replay: List<Note>) {
+    fun judge(beatMap: BeatMap, replay: ReplayModel) {
         val unjudgeNotes = LinkedList<Note>(beatMap.notes)
-        for (action in replay) {
+        for (action in replay.replayData) {
 
             var targetNote: Note? = null
             var minDiff = Long.MAX_VALUE
@@ -67,14 +68,14 @@ object ReplayMaster {
 
     // TODO: options
     @JvmStatic
-    fun render(beatMap: BeatMap, replay: List<Note>, outPath: String) {
+    fun render(beatMap: BeatMap, replay: ReplayModel, outPath: String) {
         val beatString = writeNotes(beatMap.notes)
-        val replayString = writeNotes(replay)
-        nativeRender(beatMap.key, beatMap.notes.size, beatString, replay.size, replayString, outPath)
+        val replayString = writeNotes(replay.replayData)
+        nativeRender(beatMap.key, beatMap.notes.size, beatString, replay.replayData.size, replayString, outPath)
     }
 
     @JvmStatic
-    fun attachBgm(beatMap: BeatMap, videoFile: File, outFile: File, ffmpegPath: String = "ffmpeg") {
+    fun attachBgm(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, ffmpegPath: String = "ffmpeg") {
         println("FFmpeg path: $ffmpegPath")
 
         val ffmpeg = ProcessBuilder()
@@ -82,6 +83,7 @@ object ReplayMaster {
                         ffmpegPath,
                         "-i", videoFile.absolutePath,
                         "-i", beatMap.bgmPath,
+                        "-filter:a", "atempo=$rate",
                         "-f", "avi",
                         "-y",
                         outFile.absolutePath
