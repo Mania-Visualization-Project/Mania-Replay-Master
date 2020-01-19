@@ -18,7 +18,7 @@ object Main {
             return
         }
 
-        print("Read beatmap: ${args[0]} ... ")
+        println("Read beatmap: ${args[0]} ... ")
         val beatMap = OsuConverter.fromBeatMap(args[0])
         println("Success!")
 
@@ -43,7 +43,7 @@ object Main {
         println("Begin attaching BGM ...")
         ReplayMaster.attachBgm(beatMap, tempFile, outFile)
 
-        println("Render success! Output file is: $outFile")
+        println("\nRender success! Output file is: $outFile")
 //        File(tempFile).delete()
     }
 }

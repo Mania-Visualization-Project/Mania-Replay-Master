@@ -44,6 +44,7 @@ object OsuConverter {
                 }
                 it.startsWith("[") -> {
                     find = it == "[HitObjects]"
+                    if (find) println(">>>> read notes ...")
                     return@filter false
                 }
             }

@@ -1,21 +1,11 @@
 package me.replaymaster
 
-import it.sauronsoftware.jave.DefaultFFMPEGLocator
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
-import java.lang.StringBuilder
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.util.*
 import kotlin.math.abs
-import java.awt.SystemColor.info
-import sun.reflect.annotation.AnnotationParser.toArray
-import java.util.Arrays
-import java.io.IOException
-import com.sun.xml.internal.ws.streaming.XMLStreamReaderUtil.close
-import java.awt.SystemColor.info
-import jdk.nashorn.internal.runtime.ScriptingFunctions.readLine
-import java.io.InputStreamReader
-import java.io.BufferedReader
-import java.io.InputStream
 
 
 object ReplayMaster {
@@ -43,19 +33,23 @@ object ReplayMaster {
                     minDiff = abs(diff)
                     targetNote = note
                 } else {
-                    unjudgeNotes.remove(targetNote)
                     break
                 }
             }
 
             if (targetNote != null) {
+
+                unjudgeNotes.remove(targetNote)
+
+                targetNote.judgement = -1
+                action.judgement = -1
                 for (i in 0..beatMap.judgementTime.lastIndex) {
                     if (minDiff <= beatMap.judgementTime[i]) {
+                        targetNote.judgement = i
                         action.judgement = i
                         break
                     }
                 }
-
 //                println(action.judgement)
             }
         }
@@ -79,13 +73,7 @@ object ReplayMaster {
     }
 
     @JvmStatic
-    fun attachBgm(beatMap: BeatMap, videoFile: String, outFile: String) {
-        val locator = DefaultFFMPEGLocator()
-        val method = locator::class.java.getDeclaredMethod("getFFMPEGExecutablePath")
-        method.isAccessible = true
-        val ffmpegPath = method.invoke(locator) as String
-        method.isAccessible = false
-
+    fun attachBgm(beatMap: BeatMap, videoFile: String, outFile: String, ffmpegPath: String="ffmpeg") {
         println("FFmpeg path: $ffmpegPath")
 
         val ffmpeg = ProcessBuilder()
@@ -93,6 +81,8 @@ object ReplayMaster {
                         ffmpegPath,
                         "-i", videoFile,
                         "-i", beatMap.bgmPath,
+                        "-f", "avi",
+                        "-y",
                         outFile
                 ))
                 .redirectErrorStream(true)
@@ -101,7 +91,7 @@ object ReplayMaster {
         var line: String
         while (true) {
             line = stdout.readLine() ?: break
-            print(line)
+            println(line)
         }
         ffmpeg.waitFor()
         stdout.close()

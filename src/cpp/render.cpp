@@ -79,9 +79,9 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
             x += width / 5;
             width -= 2 * width / 5;
         }
-        Scalar color = isBase ? Scalar::all(127) : getJudgementColor(note.judgement);
+        Scalar color = getJudgementColor(note.judgement);
         rectangle(image, Point(x, y), Point(x + width, y - h),
-                  color, isBase ? 1 : FILLED);
+                  color, isBase ? 2 : FILLED);
     }
     return beginIndex;
 }
@@ -132,7 +132,9 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
         dark.copyTo(image);
         if ((int) (time / duration * 100) > progress) {
             progress = (int) (time / duration * 100);
-            cout << progress << "%" << endl;
+            if (progress % 5 == 0) {
+                cout << progress << "%" << endl;
+            }
         }
 
         lastBeat = render(lastBeat, beats, time, image, true);

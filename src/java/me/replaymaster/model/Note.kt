@@ -1,8 +1,5 @@
 package me.replaymaster.model
 
-import java.io.OutputStream
-import java.nio.ByteBuffer
-
 data class Note(
         val timeStamp: Long = 0,
         val column: Int = 0,
