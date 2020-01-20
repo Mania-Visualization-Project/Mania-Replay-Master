@@ -10,6 +10,8 @@ Currently the project only supports Osu!Mania replay visualization.
 
 ## 截图 Screenshot
 
+Demo: https://www.bilibili.com/video/av84322571/
+
 - Lynessa's Jack Collection [Uetso Shi - Firmament Castle Velier]
 
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image3.png?raw=true)
