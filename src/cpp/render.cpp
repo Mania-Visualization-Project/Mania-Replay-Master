@@ -56,7 +56,7 @@ inline Scalar getJudgementColor(int judgement) {
         case 3:
             return Scalar(197, 104, 30);
         case 4:
-            return Scalar(131, 117, 106);
+            return Scalar(155, 52, 225);
         default:
             return Scalar(0, 0, 255);
     }

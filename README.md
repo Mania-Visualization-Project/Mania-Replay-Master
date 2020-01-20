@@ -1,8 +1,8 @@
 # Mania Replay Render
 
-Mania Replay Render是一个下落式音游（Mania）回放的可视化工具。它可在谱面中加上打击位置，并标注音符判定情况，最终渲染成视频文件输出。项目通过可视化某一游玩记录的判定细节，以此达到提升观赏效果、分析玩家的综合实力、判断是否为科技等目的。
+Mania Replay Render是一个下落式音游（Mania）回放的可视化工具。它可在谱面中加上打击位置，并标注音符判定情况，最终渲染成视频文件输出。项目通过可视化某一游玩记录的判定细节，以此达到提升观赏效果、学习糊法、分析玩家的综合实力、判断是否为科技等目的。
 
-Mania Replay Render is a visualization tool for falling music games (Mania) replay. It can attach hit positions to the map, mark judgement of the note, and render an output video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, analyze the comprehensive strength of a player, and judge if a player is trick.
+Mania Replay Render is a visualization tool for falling music games (Mania) replay. It can attach hit positions to the map, mark judgement of the note, and render an output video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, learn the play skills, analyze the comprehensive strength of a player, and judge if a player is trick.
 
 目前项目仅支持Osu!Mania游戏的可视化。
 
