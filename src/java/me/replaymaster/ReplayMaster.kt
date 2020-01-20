@@ -40,7 +40,6 @@ object ReplayMaster {
         for (action in replay.replayData) {
 
             var targetNote: Note? = null
-            var minDiff = Long.MAX_VALUE
             val oldDuration = action.duration
             action.duration = 0 // mark rice
 
@@ -48,15 +47,12 @@ object ReplayMaster {
                 if (note.column != action.column) continue
 
                 val diff = note.timeStamp - action.timeStamp
-                if (diff > beatMap.judgementTime.last()) {
-                    break
+                if (abs(diff) > beatMap.judgementTime.last()) {
+                    if (diff > 0) break
+                    continue
                 }
-                if (abs(diff) < minDiff) {
-                    minDiff = abs(diff)
-                    targetNote = note
-                } else {
-                    break
-                }
+                targetNote = note
+                break
             }
 
             if (targetNote != null) {
