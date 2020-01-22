@@ -11,7 +11,7 @@ import java.util.*
 
 object Main {
 
-    val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())
+    val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())!!
 
     @Throws(IOException::class, CompressorException::class)
     @JvmStatic
@@ -22,15 +22,18 @@ object Main {
             return
         }
 
+        val beatMapFile = readFile(args[0])
+        val replayFile = readFile(args[1])
+
         printWelcome()
 
-        print(RESOURCE_BUNDLE.getFormatString("read.replay", args[1]))
-        val replayData = ReplayData(ReplayReader(File(args[1])).parse())
+        print(RESOURCE_BUNDLE.getFormatString("read.replay", replayFile))
+        val replayData = ReplayData(ReplayReader(File(replayFile)).parse())
         replayData.parse()
         println(RESOURCE_BUNDLE.getString("success"))
 
-        println(RESOURCE_BUNDLE.getFormatString("read.beatmap", args[0]))
-        val beatMap = OsuConverter.fromBeatMap(args[0], replayData)
+        println(RESOURCE_BUNDLE.getFormatString("read.beatmap", beatMapFile))
+        val beatMap = OsuConverter.fromBeatMap(beatMapFile, replayData)
         println(RESOURCE_BUNDLE.getString("success"))
 
         println(RESOURCE_BUNDLE.getString("parse.replay"))
@@ -71,7 +74,7 @@ object Main {
         tempFile.delete()
     }
 
-    fun printWelcome() {
+    private fun printWelcome() {
         val reposite = RESOURCE_BUNDLE.getString("app.reposite")
         val appName = RESOURCE_BUNDLE.getString("app.name")
         val versionName = RESOURCE_BUNDLE.getString("app.version")
@@ -91,6 +94,13 @@ object Main {
         print(space)
         print(content)
         println(space)
+    }
+
+    private fun readFile(content: String): String {
+        if (content.startsWith("\"") && content.endsWith("\"")) {
+            return content.substring(1, content.length - 1)
+        }
+        return content
     }
 }
 
