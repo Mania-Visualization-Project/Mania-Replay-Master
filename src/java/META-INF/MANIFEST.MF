@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Class-Path: xz-1.8.jar osu-replay.jar kotlin-test.jar kotlin-stdlib.ja
+ r kotlin-reflect.jar commons-codec-1.10.jar kotlin-stdlib-jdk7.jar ko
+ tlin-stdlib-jdk8.jar kotlin-test-sources.jar commons-compress-1.19.ja
+ r kotlin-stdlib-sources.jar kotlin-reflect-sources.jar kotlin-stdlib-
+ jdk7-sources.jar kotlin-stdlib-jdk8-sources.jar kotlin-stdlib.jar kot
+ lin-reflect.jar kotlin-test.jar kotlin-stdlib-jdk7.jar kotlin-stdlib-
+ jdk8.jar
+Main-Class: me.replaymaster.Main
+

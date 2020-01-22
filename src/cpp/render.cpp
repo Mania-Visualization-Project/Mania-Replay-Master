@@ -158,7 +158,7 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
 
     int progress = 0;
 
-    for (double time = 0; time < duration; time += TIME_INTERVAL) {
+    for (double time = TIME_WINDOW; time < duration; time += TIME_INTERVAL) {
         dark.copyTo(image);
         if ((int) (time / duration * 100) > progress) {
             progress = (int) (time / duration * 100);

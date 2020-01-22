@@ -7,42 +7,47 @@ import java.io.File
 
 import java.io.IOException
 import java.lang.Exception
+import java.util.*
 
 object Main {
+
+    val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())
 
     @Throws(IOException::class, CompressorException::class)
     @JvmStatic
     fun main(args: Array<String>) {
         if (args.size != 2) {
-            println("Error argument number: ${args.size}")
-            println("Arguments format: [beatmap.osu] [replay.osr]")
+            println(RESOURCE_BUNDLE.getFormatString("error.argument", args.size))
+            println(RESOURCE_BUNDLE.getString("error.argument.hint"))
             return
         }
 
-        print("Read replay: ${args[1]} ... ")
+        printWelcome()
+
+        print(RESOURCE_BUNDLE.getFormatString("read.replay", args[1]))
         val replayData = ReplayData(ReplayReader(File(args[1])).parse())
         replayData.parse()
-        println("Success!")
+        println(RESOURCE_BUNDLE.getString("success"))
 
-        println("Read beatmap: ${args[0]} ... ")
+        println(RESOURCE_BUNDLE.getFormatString("read.beatmap", args[0]))
         val beatMap = OsuConverter.fromBeatMap(args[0], replayData)
-        println("Success!")
+        println(RESOURCE_BUNDLE.getString("success"))
 
-        println("Parse replay ... ")
+        println(RESOURCE_BUNDLE.getString("parse.replay"))
         val replayModel = OsuConverter.fromReplay(replayData, beatMap.key)
-        println("Success!")
+        println(RESOURCE_BUNDLE.getString("success"))
 
         if (replayModel.rate != 1.0) {
-            print("Scale rate to ${replayModel.rate}... ")
+            print(RESOURCE_BUNDLE.getFormatString("rate.scale", replayModel.rate))
             OsuConverter.scaleRate(replayModel, beatMap)
-            println("Success!")
+            println(RESOURCE_BUNDLE.getString("success"))
         }
 
-        print("Generate judgement ... ")
+        print(RESOURCE_BUNDLE.getString("judgement.generate"))
         ReplayMaster.judge(beatMap, replayModel, true)
-        println("Success!")
+        println(RESOURCE_BUNDLE.getString("success"))
 
-        println("Begin rendering ...")
+        println(RESOURCE_BUNDLE.getString("render"))
         val outFile = File("out.avi")
         val tempFile = File("temp.avi")
         if (outFile.exists()) {
@@ -50,7 +55,7 @@ object Main {
         }
         ReplayMaster.render(beatMap, replayModel, tempFile.absolutePath)
 
-        println("Begin attaching BGM ...")
+        println(RESOURCE_BUNDLE.getString("attach.bgm"))
         try {
             ReplayMaster.attachBgm(beatMap, tempFile, outFile, replayModel.rate)
         } catch (ex: Exception) {
@@ -62,7 +67,33 @@ object Main {
             tempFile.copyTo(outFile, true)
         }
 
-        println("\nRender success! Output file is: ${outFile.absolutePath}")
+        println(RESOURCE_BUNDLE.getFormatString("render.success", outFile.absolutePath))
         tempFile.delete()
     }
+
+    fun printWelcome() {
+        val reposite = RESOURCE_BUNDLE.getString("app.reposite")
+        val appName = RESOURCE_BUNDLE.getString("app.name")
+        val versionName = RESOURCE_BUNDLE.getString("app.version")
+        val authorName = RESOURCE_BUNDLE.getString("app.author")
+        val length = reposite.length + 2
+        val header = "=".repeat(length)
+
+        println(header)
+        printItem("$appName $versionName", length)
+        printItem(authorName, length)
+        printItem(reposite, length)
+        printItem(header, length)
+    }
+
+    private fun printItem(content: String, length: Int) {
+        val space = " ".repeat((length - content.length) / 2)
+        print(space)
+        print(content)
+        println(space)
+    }
+}
+
+fun ResourceBundle.getFormatString(key: String, vararg args: Any?): String {
+    return String.format(getString(key), *args)
 }

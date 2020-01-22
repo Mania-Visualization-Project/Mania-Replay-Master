@@ -39,19 +39,19 @@ object OsuConverter {
             when {
                 it.startsWith("CircleSize") -> {
                     key = it.split(":").last().toInt()
-                    println(">>>> read key: $key")
+                    println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.key", key.toString()))
                 }
                 it.startsWith("OverallDifficulty") -> {
                     od = it.split(":").last().toDouble()
-                    println(">>>> read od: $od")
+                    println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.od", od))
                 }
                 it.startsWith("AudioFilename") -> {
                     bgmFile = File(inputFile.parent, it.split(":").last().trim()).absolutePath
-                    println(">>>> read bgm: $bgmFile")
+                    println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.bgm", bgmFile))
                 }
                 it.startsWith("[") -> {
                     find = it == "[HitObjects]"
-                    if (find) println(">>>> read notes ...")
+                    if (find) println(Main.RESOURCE_BUNDLE.getString("read.beatmap.notes"))
                     return@filter false
                 }
             }
@@ -108,7 +108,7 @@ object OsuConverter {
             Mods.has(replayData.replay.mods, Mods.HalfTime) -> 0.75
             else -> 1.0
         }
-        println(">>>> read rate: x$rate")
+        println(Main.RESOURCE_BUNDLE.getFormatString("parse.replay.rate", rate))
         return ReplayModel(list, rate)
     }
 }

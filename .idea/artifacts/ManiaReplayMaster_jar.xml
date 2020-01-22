@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact name="ManiaReplayMaster:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ManiaReplayMaster_jar</output-path>
+    <root id="root">
+      <element id="archive" name="ManiaReplayMaster.jar">
+        <element id="module-output" name="ManiaReplayMaster" />
+      </element>
+      <element id="library" level="project" name="lib" />
+      <element id="library" level="project" name="KotlinJavaRuntime" />
+    </root>
+  </artifact>
+</component>

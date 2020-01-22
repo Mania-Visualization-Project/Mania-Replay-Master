@@ -90,7 +90,6 @@ object ReplayMaster {
 
     @JvmStatic
     fun attachBgm(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, ffmpegPath: String = "ffmpeg") {
-        println("FFmpeg path: $ffmpegPath")
 
         val ffmpeg = ProcessBuilder()
                 .command(listOf(

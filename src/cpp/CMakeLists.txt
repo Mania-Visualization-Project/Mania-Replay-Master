@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(render)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall")
 # JNI
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--add-stdcall-alias")
 include_directories("C:\\JDK8\\include" "C:\\JDK8\\include\\win32")
