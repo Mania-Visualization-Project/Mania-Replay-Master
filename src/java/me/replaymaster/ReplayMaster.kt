@@ -80,12 +80,11 @@ object ReplayMaster {
         return sb.toString()
     }
 
-    // TODO: options
     @JvmStatic
-    fun render(beatMap: BeatMap, replay: ReplayModel, outPath: String) {
+    fun render(beatMap: BeatMap, replay: ReplayModel, outPath: String, speed: Int) {
         val beatString = writeNotes(beatMap.notes)
         val replayString = writeNotes(replay.replayData)
-        nativeRender(beatMap.key, beatMap.notes.size, beatString, replay.replayData.size, replayString, outPath)
+        nativeRender(beatMap.key, beatMap.notes.size, beatString, replay.replayData.size, replayString, outPath, speed)
     }
 
     @JvmStatic
@@ -122,5 +121,5 @@ object ReplayMaster {
     external fun nativeRender(key: Int,
                               beatSize: Int, beatNotes: String,
                               replaySize: Int, replayNotes: String,
-                              resultPath: String)
+                              resultPath: String, speed: Int)
 }

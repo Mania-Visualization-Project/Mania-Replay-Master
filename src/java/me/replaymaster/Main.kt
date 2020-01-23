@@ -16,14 +16,20 @@ object Main {
     @Throws(IOException::class, CompressorException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        if (args.size != 2) {
-            println(RESOURCE_BUNDLE.getFormatString("error.argument", args.size))
-            println(RESOURCE_BUNDLE.getString("error.argument.hint"))
-            return
+        if (args.size < 2) {
+            onErrorParams(args.size)
         }
 
-        val beatMapFile = readFile(args[0])
-        val replayFile = readFile(args[1])
+        var speed = 15
+        var paramStart = 0
+
+        if (args[paramStart].startsWith("-speed=")) {
+            speed = args[paramStart].split("=", limit = 2)[1].toInt()
+            paramStart += 1
+        }
+
+        val beatMapFile = readFile(args[paramStart])
+        val replayFile = readFile(args[paramStart + 1])
 
         printWelcome()
 
@@ -50,13 +56,13 @@ object Main {
         ReplayMaster.judge(beatMap, replayModel, true)
         println(RESOURCE_BUNDLE.getString("success"))
 
-        println(RESOURCE_BUNDLE.getString("render"))
+        println(RESOURCE_BUNDLE.getFormatString("render", speed))
         val outFile = File("out.avi")
         val tempFile = File("temp.avi")
         if (outFile.exists()) {
             outFile.delete()
         }
-        ReplayMaster.render(beatMap, replayModel, tempFile.absolutePath)
+        ReplayMaster.render(beatMap, replayModel, tempFile.absolutePath, speed)
 
         println(RESOURCE_BUNDLE.getString("attach.bgm"))
         try {
@@ -101,6 +107,12 @@ object Main {
             return content.substring(1, content.length - 1)
         }
         return content
+    }
+
+    private fun onErrorParams(argsSize: Int) {
+        println(RESOURCE_BUNDLE.getFormatString("error.argument", argsSize))
+        println(RESOURCE_BUNDLE.getString("error.argument.hint"))
+        System.exit(-1)
     }
 }
 

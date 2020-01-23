@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (IILjava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
-  (JNIEnv *, jclass, jint, jint, jstring, jint, jstring, jstring);
+  (JNIEnv *, jclass, jint, jint, jstring, jint, jstring, jstring, jint);
 
 #ifdef __cplusplus
 }

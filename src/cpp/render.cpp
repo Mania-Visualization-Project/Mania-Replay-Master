@@ -4,20 +4,20 @@
 #include "me_replaymaster_ReplayMaster.h"
 
 #define FPS 60
-#define PIXEL_PER_FRAME (900.0 / FPS)
 #define BLOCK_HEIGHT 40
 #define GAME_WIDTH 540
 #define GAME_HEIGHT 960
 #define ACTION_HEIGHT 5
 #define COLLUMN_PADDING_RATIO 0.1
 #define TIME_INTERVAL (1000.0 / FPS)
-#define TIME_WINDOW ((double) GAME_HEIGHT / PIXEL_PER_FRAME * TIME_INTERVAL)
-#define TIME_TO_HEIGHT(t) ((int)(((double) (t)) / TIME_WINDOW * GAME_HEIGHT))
-
 #define TYPE_IMAGE CV_8UC3
 
 using namespace cv;
 using namespace std;
+
+int pixelPerFrame;
+double timeWindow;
+int columnWidth;
 
 struct Note {
     long timeStamp;
@@ -35,7 +35,17 @@ struct Note {
               judgementStart(judgementStart), judgementEnd(judgementEnd) {}
 };
 
-void readNote(istream &stream, vector<Note> &vector) {
+static void setup(jint key, jint speed) {
+    columnWidth = (int) ((double) GAME_WIDTH / key);
+    pixelPerFrame = speed;
+    timeWindow = (double) GAME_HEIGHT / pixelPerFrame * TIME_INTERVAL;
+}
+
+inline static int timeToHeight(double t) {
+    return (int) (((double) (t)) / timeWindow * GAME_HEIGHT);
+}
+
+static void readNote(istream &stream, vector<Note> &vector) {
     long timeStamp;
     int column;
     long duration;
@@ -45,7 +55,7 @@ void readNote(istream &stream, vector<Note> &vector) {
     vector.emplace_back(timeStamp, column, duration, judgementStart, judgementEnd);
 }
 
-inline Scalar getJudgementColor(int judgement) {
+static inline Scalar getJudgementColor(int judgement) {
     switch (judgement) {
         case 0:
             return Scalar(255, 255, 255);
@@ -62,12 +72,11 @@ inline Scalar getJudgementColor(int judgement) {
     }
 }
 
-int columnWidth = 0;
 
 void renderNote(Mat &image, Note &note, double time, bool isBase, int judgement) {
     int x = (int) (note.column * columnWidth);
-    int y = TIME_TO_HEIGHT(time);
-    int h = MAX(BLOCK_HEIGHT, TIME_TO_HEIGHT(note.duration));
+    int y = timeToHeight(time);
+    int h = MAX(BLOCK_HEIGHT, timeToHeight(note.duration));
     int width = columnWidth;
     if (!isBase) {
         h = ACTION_HEIGHT;
@@ -85,11 +94,12 @@ void renderNote(Mat &image, Note &note, double time, bool isBase, int judgement)
 void renderActionLN(Mat &image, Note &note, double currentTime) {
     int width = ACTION_HEIGHT / 2;
     int x = (int) (note.column * columnWidth) + columnWidth / 2;
-    int y = TIME_TO_HEIGHT(currentTime - note.timeStamp);
-    int h = TIME_TO_HEIGHT(note.duration);
+    int y = timeToHeight(currentTime - note.timeStamp);
+    int h = timeToHeight(note.duration);
     if (y < h) h = y;
     Scalar color(50, 50, 50);
-    for (int currentH = ACTION_HEIGHT * 2; currentH + ACTION_HEIGHT <= h; currentH += ACTION_HEIGHT * 2) {
+    for (int currentH = ACTION_HEIGHT * 2;
+         currentH + ACTION_HEIGHT <= h; currentH += ACTION_HEIGHT * 2) {
         rectangle(image,
                   Point(x - width, y - currentH),
                   Point(x + width, y - currentH - ACTION_HEIGHT),
@@ -101,8 +111,7 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
     const int dataSize = data.size();
     for (int i = beginIndex; i < dataSize && data[i].timeStamp <= time; i++) {
         auto &note = data[i];
-        if (TIME_TO_HEIGHT(time - note.getEndTime()) > GAME_HEIGHT) {
-//            beginIndex = i + 1;
+        if (timeToHeight(time - note.getEndTime()) > GAME_HEIGHT) {
             continue;
         }
         renderNote(image, note, time - note.timeStamp, isBase, note.judgementStart);
@@ -128,7 +137,9 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
  */
 JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
         (JNIEnv *env, jclass, jint key, jint beatSize, jstring jBeatNotes, jint replaySize,
-         jstring jReplayNotes, jstring jPath) {
+         jstring jReplayNotes, jstring jPath, jint speed) {
+
+    setup(key, speed);
 
     auto beatNotes = env->GetStringUTFChars(jBeatNotes, JNI_FALSE);
     auto replayNotes = env->GetStringUTFChars(jReplayNotes, JNI_FALSE);
@@ -154,11 +165,10 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
     auto duration = beats[beatSize - 1].getEndTime() + 2000;
     cout << "duration: " << duration << "ms" << endl;
     int lastBeat = 0, lastReplay = 0;
-    columnWidth = (int) ((double) GAME_WIDTH / key);
 
     int progress = 0;
 
-    for (double time = TIME_WINDOW; time < duration; time += TIME_INTERVAL) {
+    for (double time = timeWindow; time < duration; time += TIME_INTERVAL) {
         dark.copyTo(image);
         if ((int) (time / duration * 100) > progress) {
             progress = (int) (time / duration * 100);
