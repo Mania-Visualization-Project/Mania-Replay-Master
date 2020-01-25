@@ -63,8 +63,12 @@ object Main {
         println(RESOURCE_BUNDLE.getString("success"))
 
         println(RESOURCE_BUNDLE.getFormatString("render", speed))
-        val outFile = File("out.avi")
-        val tempFile = File("temp.avi")
+        val parent = File("out")
+        if (!parent.isDirectory()) {
+            parent.mkdir()
+        }
+        val outFile = File(parent, "${File(beatMapFile).nameWithoutExtension}.avi")
+        val tempFile = File(parent, "temp.avi")
         if (outFile.exists()) {
             outFile.delete()
         }
