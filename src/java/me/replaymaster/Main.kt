@@ -52,6 +52,12 @@ object Main {
             println(RESOURCE_BUNDLE.getString("success"))
         }
 
+        if (replayModel.mirror) {
+            print(RESOURCE_BUNDLE.getString("adjust.mirror"))
+            OsuConverter.mirror(beatMap)
+            println(RESOURCE_BUNDLE.getString("success"))
+        }
+
         print(RESOURCE_BUNDLE.getString("judgement.generate"))
         ReplayMaster.judge(beatMap, replayModel, true)
         println(RESOURCE_BUNDLE.getString("success"))

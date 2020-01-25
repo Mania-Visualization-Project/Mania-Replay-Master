@@ -2,7 +2,7 @@ package me.replaymaster.model
 
 data class Note(
         var timeStamp: Long = 0,
-        val column: Int = 0,
+        var column: Int = 0,
         var duration: Long = 0,
         var judgementStart: Int = -1, // miss
         var judgementEnd: Int = -1 // LN judgement

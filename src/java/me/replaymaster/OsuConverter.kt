@@ -7,23 +7,35 @@ import me.replays.Mods
 import me.replays.ReplayData
 import java.io.File
 import java.io.InputStream
+import java.util.*
 import kotlin.math.floor
 import kotlin.streams.toList
 
 object OsuConverter {
 
     private val BASE_JUDGEMENT_OFFSET = doubleArrayOf(16.5, 64.5, 97.5, 127.5, 151.5)
-    private val BASE_JUDGEMENT_OFFSET_DT = doubleArrayOf(16.33, 64.33, 97.0, 127.0, 151.0)
-    private val BASE_JUDGEMENT_OFFSET_HT = doubleArrayOf(16.67, 64.67, 96.67, 127.33, 151.33)
+    private val BASE_JUDGEMENT_OFFSET_HR = doubleArrayOf(11.5, 45.5, 69.5, 90.5, 107.5)
+    private val BASE_JUDGEMENT_OFFSET_EZ = doubleArrayOf(22.5, 89.5, 135.5, 177.5, 211.5)
 
+    private val DECREMENT_NONE = 3.0
+    private val DECREMENT_HR = 2.1
+    private val DECREMENT_EZ = 4.2
+
+    // FIXME: this is not the exact way the judgement time is produced. PPY has a strange algorithm that I don't know.
+    // This algorithm may have a error less than 1 ms.
     private fun getJudgement(od: Double, replayData: ReplayData): DoubleArray {
         val result = when {
-            Mods.has(replayData.replay.mods, Mods.DoubleTime) -> BASE_JUDGEMENT_OFFSET_DT
-            Mods.has(replayData.replay.mods, Mods.HalfTime) -> BASE_JUDGEMENT_OFFSET_HT
+            Mods.has(replayData.replay.mods, Mods.HardRock) -> BASE_JUDGEMENT_OFFSET_HR
+            Mods.has(replayData.replay.mods, Mods.Easy) -> BASE_JUDGEMENT_OFFSET_EZ
             else -> BASE_JUDGEMENT_OFFSET
         }.copyOf()
+        val decrement = when {
+            Mods.has(replayData.replay.mods, Mods.HardRock) -> DECREMENT_HR
+            Mods.has(replayData.replay.mods, Mods.Easy) -> DECREMENT_EZ
+            else -> DECREMENT_NONE
+        }
         for (i in 1..4) {
-            result[i] -= 3 * od
+            result[i] -= decrement * od
         }
         return result
     }
@@ -67,7 +79,9 @@ object OsuConverter {
                 }
                 .toList()
         inputStream.close()
-        return BeatMap(key, getJudgement(od, replayData), list.sorted(), bgmFile)
+        val judgement = getJudgement(od, replayData)
+        println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.judgement", Arrays.toString(judgement)))
+        return BeatMap(key, judgement, list.sorted(), bgmFile)
     }
 
     fun scaleRate(replayModel: ReplayModel, beatMap: BeatMap) {
@@ -77,6 +91,12 @@ object OsuConverter {
         }
         beatMap.notes.forEach {
             it.scale(rate)
+        }
+    }
+
+    fun mirror(beatMap: BeatMap) {
+        beatMap.notes.forEach {
+            it.column = beatMap.key - it.column - 1
         }
     }
 
@@ -109,6 +129,8 @@ object OsuConverter {
             else -> 1.0
         }
         println(Main.RESOURCE_BUNDLE.getFormatString("parse.replay.rate", rate))
-        return ReplayModel(list, rate)
+        val mirror = replayData.replay.mods and (1 shl 30) != 0
+        println(mirror)
+        return ReplayModel(list, rate, mirror)
     }
 }
