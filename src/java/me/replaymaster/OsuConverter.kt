@@ -104,7 +104,7 @@ object OsuConverter {
         var current: Long = 0
         val holdBeginTime = Array<Long>(key) { 0 }
         val list = arrayListOf<Note>()
-        for (i in 2..(replayData.actions.size - 2)) {
+        for (i in 0..(replayData.actions.size - 2)) {
             val action = replayData.actions[i]
             var x = action.x.toInt()
             current += action.w
@@ -130,7 +130,6 @@ object OsuConverter {
         }
         println(Main.RESOURCE_BUNDLE.getFormatString("parse.replay.rate", rate))
         val mirror = replayData.replay.mods and (1 shl 30) != 0
-        println(mirror)
         return ReplayModel(list, rate, mirror)
     }
 }
