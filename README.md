@@ -6,7 +6,7 @@ Mania Replay Render是一个下落式音游（Mania）回放的可视化工具�
 
 目前项目仅支持Osu!Mania游戏的可视化。
 
-## 截图 Screenshot
+## 截图
 
 演示: https://www.bilibili.com/video/av84322571/
 
@@ -23,7 +23,7 @@ Mania Replay Render是一个下落式音游（Mania）回放的可视化工具�
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image2.png?raw=true)
 
 
-## 使用方法 Usage
+## 使用方法
 
 （仅限Windows平台）
 
@@ -59,6 +59,14 @@ java -jar ManiaReplayMaster [-speed=15] beatmap.osu replay.osr
 - 将编译后的库文件librender.dll复制到lib/
 
 - 编译Kotlin代码为ManiaReplayMaster.jar
+
+## 当前问题
+
+- 目前程序只能运行在JDK 8平台上。经过测试，JDK 10和JDK 13均会出现“动态链接库(DLL)初始化例程失败”的问题。见issue [#1](https://github.com/Keytoyze/Mania-Replay-Master/issues/1)。
+
+- 在Osu!Mania中，提前拍会导致miss，但我查不到准确的时间区间。见issue [#2](https://github.com/Keytoyze/Mania-Replay-Master/issues/2)
+
+如有人知道如何解决这两个问题，请在相关issue下回复。感谢！
 
 ## LICENSE
 

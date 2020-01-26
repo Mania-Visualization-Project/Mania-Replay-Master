@@ -25,11 +25,11 @@ Demo: https://www.bilibili.com/video/av84322571/
 
 ## Usage
 
-（Only in Windows）
+(Only in Windows)
 
 First click [here](https://github.com/Keytoyze/Mania-Replay-Master/releases/download/v1.1/ManiaReplayMaster.v1.1.zip) to download the tool kit.
 
-Method one：Double click `ManiaReplayMaster.bat` batch script, enter beatmap path, replay path and falling down speed (15 pixels per frame by default) according to the hint.
+Method one: Double click `ManiaReplayMaster.bat` batch script, enter beatmap path, replay path and falling down speed (15 pixels per frame by default) according to the hint.
 
 Method two: Use the following commands to render the video.
 
@@ -53,13 +53,21 @@ The project depends on the following tools:
 
 ### Compiling method
 
-IntelliJ IDEA and CLion are recommended for compilation. Here the compiling platform is Windows 10, and the other systems can be compiled refer to follows.
+IntelliJ IDEA and CLion are recommended for compiling. Here the compiling platform is Windows 10, and the other systems can be compiled refer to follows.
 
 - Go to src/cpp, use CMake to compile JNI codes to librender.dll. You may need to modify the OpenCV and JDK dependency directories.
 
 - Copy the library file librender.dll to lib/
 
 - Compile the Kotlin codes as ManiaReplayMaster.jar
+
+## Current issues
+
+- The program currently runs well only on JDK 8 platform. On JDK 10 and JDK 13, it will crash when loading DLL: "A dynamic link library (DLL) initialization routine failed". See issue [#1](https://github.com/Keytoyze/Mania-Replay-Master/issues/1)。
+
+- In Osu!Mania, a hit ahead of time will lead to miss. But I cannot find the exact time threshold value. See issue [#2](https://github.com/Keytoyze/Mania-Replay-Master/issues/2)
+
+If someone knowns how to solve these two issues, please reply in the relevant issues. Thx!
 
 ## LICENSE
 
