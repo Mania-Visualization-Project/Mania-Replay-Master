@@ -65,9 +65,7 @@ IntelliJ IDEA and CLion are recommended for compiling. Here the compiling platfo
 
 - The program currently runs well only on JDK 8 platform. On JDK 10 and JDK 13, it will crash when loading DLL: "A dynamic link library (DLL) initialization routine failed". See issue [#1](https://github.com/Keytoyze/Mania-Replay-Master/issues/1)。
 
-- In Osu!Mania, a hit ahead of time will lead to miss. But I cannot find the exact time threshold value. See issue [#2](https://github.com/Keytoyze/Mania-Replay-Master/issues/2)
-
-If someone knowns how to solve these two issues, please reply in the relevant issues. Thx!
+If someone knowns how to solve this issue, please reply in the relevant issues. Thx!
 
 ## LICENSE
 
