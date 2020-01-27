@@ -13,9 +13,9 @@ import kotlin.streams.toList
 
 object OsuConverter {
 
-    private val BASE_JUDGEMENT_OFFSET = doubleArrayOf(16.5, 64.5, 97.5, 127.5, 151.5)
-    private val BASE_JUDGEMENT_OFFSET_HR = doubleArrayOf(11.5, 45.5, 69.5, 90.5, 107.5)
-    private val BASE_JUDGEMENT_OFFSET_EZ = doubleArrayOf(22.5, 89.5, 135.5, 177.5, 211.5)
+    private val BASE_JUDGEMENT_OFFSET = doubleArrayOf(16.5, 64.5, 97.5, 127.5, 151.5, 188.5)
+    private val BASE_JUDGEMENT_OFFSET_HR = doubleArrayOf(11.5, 45.5, 69.5, 90.5, 107.5, 133.5)
+    private val BASE_JUDGEMENT_OFFSET_EZ = doubleArrayOf(22.5, 89.5, 135.5, 177.5, 211.5, 263.5)
 
     private val DECREMENT_NONE = 3.0
     private val DECREMENT_HR = 2.1
@@ -34,7 +34,7 @@ object OsuConverter {
             Mods.has(replayData.replay.mods, Mods.Easy) -> DECREMENT_EZ
             else -> DECREMENT_NONE
         }
-        for (i in 1..4) {
+        for (i in 1..result.lastIndex) {
             result[i] -= decrement * od
         }
         return result
@@ -81,7 +81,8 @@ object OsuConverter {
         inputStream.close()
         val judgement = getJudgement(od, replayData)
         println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.judgement", Arrays.toString(judgement)))
-        return BeatMap(key, judgement, list.sorted(), bgmFile)
+        val judgementEnd = judgement.map { it * 1.5 }.toDoubleArray()
+        return BeatMap(key, judgement, list.sorted(), bgmFile, judgementEnd)
     }
 
     fun scaleRate(replayModel: ReplayModel, beatMap: BeatMap) {

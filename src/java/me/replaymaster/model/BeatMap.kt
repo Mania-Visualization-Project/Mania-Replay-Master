@@ -4,5 +4,6 @@ data class BeatMap(
         val key: Int,
         val judgementTime: DoubleArray,
         val notes: List<Note>,
-        val bgmPath: String
+        val bgmPath: String,
+        val judgementTimeEnd: DoubleArray
 )

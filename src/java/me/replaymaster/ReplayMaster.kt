@@ -64,7 +64,7 @@ object ReplayMaster {
                 if (targetNote.duration > 0) { // LN
                     action.duration = oldDuration
                     if (judgeLn) {
-                        judgeNote(targetNote, action, beatMap.judgementTime, false)
+                        judgeNote(targetNote, action, beatMap.judgementTimeEnd, false)
                     }
                 }
             }
