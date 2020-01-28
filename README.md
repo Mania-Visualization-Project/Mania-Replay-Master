@@ -56,15 +56,9 @@ java -jar ManiaReplayMaster [-speed=15] beatmap.osu replay.osr
 
 - 进入src/cpp目录，使用CMake将JNI编译为librender.dll。可能需要修改OpenCV和JDK依赖目录。
 
-- 将编译后的库文件librender.dll复制到lib/
+- 将编译后的库文件librender.dll路径添加到java.library.path
 
 - 编译Kotlin代码为ManiaReplayMaster.jar
-
-## 当前问题
-
-- 目前程序只能运行在JDK 8平台上。经过测试，JDK 10和JDK 13均会出现“动态链接库(DLL)初始化例程失败”的问题。见issue [#1](https://github.com/Keytoyze/Mania-Replay-Master/issues/1)。
-
-如有人知道如何解决这个问题，请在相关issue下回复。感谢！
 
 ## LICENSE
 

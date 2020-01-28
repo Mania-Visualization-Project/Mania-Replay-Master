@@ -57,15 +57,9 @@ IntelliJ IDEA and CLion are recommended for compiling. Here the compiling platfo
 
 - Go to src/cpp, use CMake to compile JNI codes to librender.dll. You may need to modify the OpenCV and JDK dependency directories.
 
-- Copy the library file librender.dll to lib/
+- Add the path to librender.dll to java.library.path
 
 - Compile the Kotlin codes as ManiaReplayMaster.jar
-
-## Current issues
-
-- The program currently runs well only on JDK 8 platform. On JDK 10 and JDK 13, it will crash when loading DLL: "A dynamic link library (DLL) initialization routine failed". See issue [#1](https://github.com/Keytoyze/Mania-Replay-Master/issues/1)。
-
-If someone knowns how to solve this issue, please reply in the relevant issues. Thx!
 
 ## LICENSE
 
