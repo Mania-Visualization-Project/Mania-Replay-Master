@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--add-stdcall-alias")
 include_directories("C:\\JDK8\\include" "C:\\JDK8\\include\\win32")
 # OpenCV
-set(OpenCV_DIR "G:\\code\\cpp\\opencv-build\\mingw-build\\install")
+set(OpenCV_DIR "G:\\course\\cv\\opencv_build\\install")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
