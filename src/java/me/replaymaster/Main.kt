@@ -68,7 +68,7 @@ object Main {
             parent.mkdir()
         }
         val outFile = File(parent, "${File(beatMapFile).nameWithoutExtension}.avi")
-        val tempFile = File(parent, "temp.avi")
+        val tempFile = File(parent, "${File(beatMapFile).nameWithoutExtension}_temp.avi")
         if (outFile.exists()) {
             outFile.delete()
         }
