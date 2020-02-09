@@ -81,8 +81,7 @@ object OsuConverter {
         inputStream.close()
         val judgement = getJudgement(od, replayData)
         println(Main.RESOURCE_BUNDLE.getFormatString("read.beatmap.judgement", Arrays.toString(judgement)))
-        val judgementEnd = judgement.map { it * 1.5 }.toDoubleArray()
-        return BeatMap(key, judgement, list.sorted(), bgmFile, judgementEnd)
+        return BeatMap(key, judgement, list.sorted(), bgmFile, 1.5)
     }
 
     fun scaleRate(replayModel: ReplayModel, beatMap: BeatMap) {

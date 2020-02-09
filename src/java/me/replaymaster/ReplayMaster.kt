@@ -16,6 +16,15 @@ object ReplayMaster {
         System.loadLibrary("librender")
     }
 
+    private fun getJudgement(diff: Double, judgementTime: DoubleArray): Int {
+        for (i in 0..judgementTime.lastIndex) {
+            if (diff <= judgementTime[i]) {
+                return i
+            }
+        }
+        return -1
+    }
+
     private fun judgeNote(base: Note, action: Note, judgementTime: DoubleArray, start: Boolean = true) {
         base.setJudgement(-1, start)
         action.setJudgement(-1, start)
@@ -59,12 +68,21 @@ object ReplayMaster {
 
                 unjudgeNotes.remove(targetNote)
 
-                judgeNote(targetNote, action, beatMap.judgementTime)
+                val holdDiff = abs(targetNote.timeStamp - action.timeStamp)
+                val holdJudgement = getJudgement(holdDiff.toDouble(), beatMap.judgementTime)
+                targetNote.setJudgement(holdJudgement, true)
+                action.setJudgement(holdJudgement, true)
 
                 if (targetNote.duration > 0) { // LN
                     action.duration = oldDuration
                     if (judgeLn) {
-                        judgeNote(targetNote, action, beatMap.judgementTimeEnd, false)
+                        val releaseDiff = abs(targetNote.endTime - action.endTime) / beatMap.releaseLenience
+                        val releaseJudgement = getJudgement(releaseDiff, beatMap.judgementTime)
+                        action.setJudgement(releaseJudgement, false)
+
+                        // judgement of long note is the average of hold judgement and release judgement (including lenience)
+                        val lnJudgement = getJudgement((releaseDiff + holdDiff) / 2.0, beatMap.judgementTime)
+                        targetNote.setJudgement(lnJudgement, true)
                     }
                 }
             }
