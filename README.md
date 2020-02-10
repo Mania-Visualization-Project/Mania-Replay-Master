@@ -27,11 +27,13 @@ Mania Replay Render是一个下落式音游（Mania）回放的可视化工具�
 
 （仅限Windows平台）
 
-首先点击[此处](https://github.com/Keytoyze/Mania-Replay-Master/releases/download/v1.1/ManiaReplayMaster.v1.1.zip)下载工具包。
+首先点击[此处](https://github.com/Keytoyze/Mania-Replay-Master/releases/download/v1.2/ManiaReplayMaster.v1.2.zip)下载工具包。
 
-方法一：双击`ManiaReplayMaster.bat`批处理脚本，按照提示输入谱面路径、回放路径和下落速度（默认为15像素/帧）。
+方法一（推荐）：使用游戏内渲染插件“MRM-extension.exe”，在结算界面点击F1键。
 
-方法二：使用如下命令行参数进行操作。
+方法二：双击`ManiaReplayMaster.bat`批处理脚本，按照提示输入谱面路径、回放路径和下落速度（默认为15像素/帧）。
+
+方法三：使用如下命令行参数进行操作。
 ```bash
 cd library
 java -jar ManiaReplayMaster [-speed=15] beatmap.osu replay.osr

@@ -27,11 +27,13 @@ Demo: https://www.bilibili.com/video/av84322571/
 
 (Only in Windows)
 
-First click [here](https://github.com/Keytoyze/Mania-Replay-Master/releases/download/v1.1/ManiaReplayMaster.v1.1.zip) to download the tool kit.
+First click [here](https://github.com/Keytoyze/Mania-Replay-Master/releases/download/v1.2/ManiaReplayMaster.v1.2_EN.zip) to download the tool kit.
 
-Method one: Double click `ManiaReplayMaster.bat` batch script, enter beatmap path, replay path and falling down speed (15 pixels per frame by default) according to the hint.
+Method one (recommended): Double click `MRM-extension.exe`, then press F1 key on the ranking interface on Osu!Mania.
 
-Method two: Use the following commands to render the video.
+Method two: Double click `ManiaReplayMaster.bat` batch script, enter beatmap path, replay path and falling down speed (15 pixels per frame by default) according to the hint.
+
+Method three: Use the following commands to render the video.
 
 ```bash
 cd library
