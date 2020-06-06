@@ -1,5 +1,10 @@
 # Mania Replay Render
 
+[![](https://img.shields.io/github/v/release/Keytoyze/Mania-Replay-Master?color=blue)](https://github.com/Keytoyze/Mania-Replay-Master/releases/latest)
+[![](https://img.shields.io/github/downloads/Keytoyze/Mania-Replay-Master/total)](https://github.com/Keytoyze/Mania-Replay-Master/releases)
+[![](https://img.shields.io/github/issues-closed/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/issues)
+[![](https://img.shields.io/github/license/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/LICENSE)
+
 [中文版](README.md)
 
 Mania Replay Render is a visualization tool for falling music games (Mania) replay. It can attach hit positions to the map, mark judgement of the note, and render an output video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, learn the play skills, analyze the comprehensive strength of a player, and judge if a player is trick.

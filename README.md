@@ -1,5 +1,10 @@
 # Mania Replay Render
 
+[![](https://img.shields.io/github/v/release/Keytoyze/Mania-Replay-Master?color=blue)](https://github.com/Keytoyze/Mania-Replay-Master/releases/latest)
+[![](https://img.shields.io/github/downloads/Keytoyze/Mania-Replay-Master/total)](https://github.com/Keytoyze/Mania-Replay-Master/releases)
+[![](https://img.shields.io/github/issues-closed/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/issues)
+[![](https://img.shields.io/github/license/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/LICENSE)
+
 [English version](README_EN.md)
 
 Mania Replay Render是一个下落式音游（Mania）回放的可视化工具。它可在谱面中加上打击位置，并标注音符判定情况，最终渲染成视频文件输出。项目通过可视化某一游玩记录的判定细节，以此达到提升观赏效果、学习糊法、分析玩家的综合实力、判断是否为科技等目的。
