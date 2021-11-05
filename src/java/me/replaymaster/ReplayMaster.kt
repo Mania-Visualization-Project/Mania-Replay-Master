@@ -3,23 +3,22 @@ package me.replaymaster
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
 import me.replaymaster.model.ReplayModel
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 
 object ReplayMaster {
 
-    init {
-        System.loadLibrary("librender")
-    }
+    val STAGE_RENDER = 30
+    val STAGE_SPLICT = 60
 
     private fun getJudgement(diff: Double, judgementTime: DoubleArray): Int {
         for (i in 0..judgementTime.lastIndex) {
             if (diff <= judgementTime[i]) {
-                return i
+                return if (i == judgementTime.lastIndex) -1 else i
             }
         }
         return -1
@@ -56,7 +55,7 @@ object ReplayMaster {
                 if (note.column != action.column) continue
 
                 val diff = note.timeStamp - action.timeStamp
-                if (abs(diff) > beatMap.judgementTime.last()) {
+                if (abs(diff) > replay.judgement.last()) {
                     if (diff > 0) break
                     continue
                 }
@@ -69,75 +68,69 @@ object ReplayMaster {
                 unjudgeNotes.remove(targetNote)
 
                 val holdDiff = abs(targetNote.timeStamp - action.timeStamp)
-                val holdJudgement = getJudgement(holdDiff.toDouble(), beatMap.judgementTime)
+                val holdJudgement = getJudgement(holdDiff.toDouble(), replay.judgement)
                 targetNote.setJudgement(holdJudgement, true)
                 action.setJudgement(holdJudgement, true)
 
                 if (targetNote.duration > 0) { // LN
                     action.duration = oldDuration
+                    action.setJudgement(holdJudgement, false)
                     if (judgeLn) {
-                        val releaseDiff = abs(targetNote.endTime - action.endTime) / beatMap.releaseLenience
-                        val releaseJudgement = getJudgement(releaseDiff, beatMap.judgementTime)
+                        val releaseDiff = abs(targetNote.endTime - action.endTime) / 1.5
+                        val releaseJudgement = getJudgement(releaseDiff, replay.judgement)
                         action.setJudgement(releaseJudgement, false)
 
                         // judgement of long note is the average of hold judgement and release judgement (including lenience)
-                        val lnJudgement = getJudgement((releaseDiff + holdDiff) / 2.0, beatMap.judgementTime)
+                        val lnJudgement = getJudgement((releaseDiff + holdDiff) / 2.0, replay.judgement)
                         targetNote.setJudgement(lnJudgement, true)
                     }
                 }
             }
         }
-    }
 
-    @JvmStatic
-    fun writeNotes(notes: List<Note>): String {
-        val sb = StringBuilder()
-        for (note in notes) {
-            sb.append(note.toString())
+        // for debug
+        val count = hashMapOf<Int, Int>()
+        for (note in beatMap.notes) {
+            count[note.judgementStart] = count.getOrDefault(note.judgementStart, 0) + 1
         }
-        return sb.toString()
+        val judgementResult = count.entries.sortedBy { it.key }.map { it.value }.toList()
+        Main.judgementFromJudging = judgementResult
+        debug("Judgement results: $count")
     }
 
     @JvmStatic
-    fun render(beatMap: BeatMap, replay: ReplayModel, outPath: String, speed: Int) {
-        val beatString = writeNotes(beatMap.notes)
-        val replayString = writeNotes(replay.replayData)
-        nativeRender(beatMap.key, beatMap.notes.size, beatString, replay.replayData.size, replayString, outPath, speed)
+    fun generateVideo(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, delay: Int,
+                      windowFrameCount: Int, ffmpegPath: String = "ffmpeg") {
+        Encoder(beatMap, videoFile, outFile, rate, delay, windowFrameCount, ffmpegPath).generateVideo()
     }
 
-    @JvmStatic
-    fun attachBgm(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, ffmpegPath: String = "ffmpeg") {
+    private val startTimes = hashMapOf<String, Long>()
+    private var preProgress = 0.0
 
-        val ffmpeg = ProcessBuilder()
-                .command(listOf(
-                        ffmpegPath,
-                        "-i", videoFile.absolutePath,
-                        "-i", beatMap.bgmPath,
-                        "-filter:a", "atempo=$rate",
-                        "-c:v", "copy",
-                        "-y",
-                        outFile.absolutePath
-                ))
-                .redirectErrorStream(true)
-                .start()
-        val stdout = BufferedReader(InputStreamReader(ffmpeg.getInputStream()))
-        var line: String
-        while (true) {
-            line = stdout.readLine() ?: break
-            println(line)
+    fun printProgress(stage: String, startProgress: Int, endProgress: Int, interProgress: Double) {
+        var progress = max(0.0, min(interProgress, 100.0)) / 100 * (endProgress - startProgress) + startProgress
+        progress = max(preProgress, progress)
+        preProgress = progress
+        if (stage !in startTimes.keys) {
+            startTimes[stage] = System.currentTimeMillis()
         }
-        ffmpeg.waitFor()
-        stdout.close()
-    }
+        if (interProgress >= 100) {
+            debug("$stage: ${(System.currentTimeMillis() - startTimes[stage]!!) / 1000.0} s")
+        }
 
-    @JvmStatic
-    fun renderCallback(progress: Float) {
-        println(progress)
-    }
+        // UI
+        val progressSize = 50
+        fun getNChar(count: Int, ch: String) = Collections.nCopies(max(count, 0), ch).joinToString("")
+        val solidCount = (progress / 100.0 * progressSize).toInt()
+        val voidCount = progressSize - solidCount
+        val progressText = String.format("%03.2f%%├", progress)
+        val totalCount = solidCount + voidCount + progressText.length + 1
 
-    @JvmStatic
-    external fun nativeRender(key: Int,
-                              beatSize: Int, beatNotes: String,
-                              replaySize: Int, replayNotes: String,
-                              resultPath: String, speed: Int)
+        print(getNChar(totalCount, "\b"))
+        print(progressText)
+
+        print(getNChar(solidCount, "█"))
+        print(getNChar(voidCount, "-"))
+        print("┤")
+    }
 }

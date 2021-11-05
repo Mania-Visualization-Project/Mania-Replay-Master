@@ -1,93 +1,151 @@
 package me.replaymaster
 
-import me.replays.ReplayData
-import me.replays.parse.ReplayReader
-import org.apache.commons.compress.compressors.CompressorException
-import java.io.File
 
+import me.replaymaster.beatmap.IMapReader
+import me.replaymaster.model.BeatMap
+import me.replaymaster.model.Config
+import me.replaymaster.model.ReplayModel
+import me.replaymaster.replay.IReplayReader
+import me.replaymaster.replay.OsuReplayReader
+import org.apache.commons.compress.compressors.CompressorException
+import java.awt.Desktop
+import java.io.File
 import java.io.IOException
-import java.lang.Exception
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 object Main {
 
-    val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())!!
+    var judgementFromReplay = listOf<Int>()
+    var judgementFromJudging = listOf<Int>()
+
+    fun prepareJudgements(beatMapFileParam: File, replayFile: File, parent: File, tempDir: File): Triple<BeatMap, ReplayModel, Long> {
+        var beatMapFile = beatMapFileParam
+        val replayReader = checkNotNull(IReplayReader.matchReplayReader(replayFile)) {
+            "Invalid replay file: ${replayFile.absolutePath}"
+        }
+        val md5 = replayReader.readBeatMapMD5(replayFile.absolutePath).toUpperCase()
+        if (!beatMapFile.isDirectory && IMapReader.isZipMap(beatMapFile)) {
+            val unzipPath = tempDir.resolve("temp_map")
+            unzipPath.mkdir()
+            logLine("read.beatmap.iscompressed", unzipPath.absolutePath)
+            unzip(beatMapFile.absolutePath, unzipPath.absolutePath)
+            beatMapFile = unzipPath
+        }
+        if (beatMapFile.isDirectory) {
+            logLine("read.beatmap.dir", beatMapFile.absolutePath)
+            beatMapFile = checkNotNull(
+                    beatMapFile.walk().filter { IMapReader.matchMapReader(it) != null }.firstOrNull {
+                        if (it.isDirectory) false
+                        else getMD5(it)?.toUpperCase() == md5
+                    }
+            ) { "Cannot find the beatmap with the given replay file with MD5: $md5" }
+        } else {
+            check(checkMD5(beatMapFile, md5)) { "The beatmap cannot match the given replay file with MD5: $md5" }
+        }
+
+        val beatMapReader = checkNotNull(IMapReader.matchMapReader(beatMapFile)) {
+            "Invalid beatmap file: ${beatMapFile.absolutePath}"
+        }
+
+        logLine("read.beatmap", beatMapFile.path)
+        val beatMap = beatMapReader.readMap(beatMapFile.absolutePath)
+
+        logLine("read.replay", replayFile.path)
+        val replayModel = replayReader.readReplay(replayFile.absolutePath, beatMap)
+
+        logLine("judgement.generate")
+        ReplayMaster.judge(beatMap, replayModel, replayReader is OsuReplayReader)
+
+        val delay = 1000L
+        beatMap.notes.forEach { it.timeStamp += delay }
+        replayModel.replayData.forEach { it.timeStamp += delay }
+
+        return Triple(beatMap, replayModel, delay)
+    }
 
     @Throws(IOException::class, CompressorException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        if (args.size < 2) {
-            onErrorParams(args.size)
+
+        val yamlPath = if (args.size > 2) {
+            readFile(args[2])
+        } else {
+            File("config.txt")
         }
-
-        var speed = 15
-        var paramStart = 0
-
-        if (args[paramStart].startsWith("-speed=")) {
-            speed = args[paramStart].split("=", limit = 2)[1].toInt()
-            paramStart += 1
-        }
-
-        val beatMapFile = readFile(args[paramStart])
-        val replayFile = readFile(args[paramStart + 1])
 
         printWelcome()
+        Config.init(yamlPath)
 
-        print(RESOURCE_BUNDLE.getFormatString("read.replay", replayFile))
-        val replayData = ReplayData(ReplayReader(File(replayFile)).parse())
-        replayData.parse()
-        println(RESOURCE_BUNDLE.getString("success"))
-
-        println(RESOURCE_BUNDLE.getFormatString("read.beatmap", beatMapFile))
-        val beatMap = OsuConverter.fromBeatMap(beatMapFile, replayData)
-        println(RESOURCE_BUNDLE.getString("success"))
-
-        println(RESOURCE_BUNDLE.getString("parse.replay"))
-        val replayModel = OsuConverter.fromReplay(replayData, beatMap.key)
-        println(RESOURCE_BUNDLE.getString("success"))
-
-        if (replayModel.rate != 1.0) {
-            print(RESOURCE_BUNDLE.getFormatString("rate.scale", replayModel.rate))
-            OsuConverter.scaleRate(replayModel, beatMap)
-            println(RESOURCE_BUNDLE.getString("success"))
+        val scanner = Scanner(System.`in`)
+        val beatMapFile = if (args.size > 0) {
+            readFile(args[0])
+        } else {
+            logLine("hint.beatmap")
+            readFile(scanner.nextLine())
         }
 
-        if (replayModel.mirror) {
-            print(RESOURCE_BUNDLE.getString("adjust.mirror"))
-            OsuConverter.mirror(beatMap)
-            println(RESOURCE_BUNDLE.getString("success"))
+        val replayFile = if (args.size > 1) {
+            readFile(args[1])
+        } else {
+            logLine("hint.replay")
+            readFile(scanner.nextLine())
         }
 
-        print(RESOURCE_BUNDLE.getString("judgement.generate"))
-        ReplayMaster.judge(beatMap, replayModel, true)
-        println(RESOURCE_BUNDLE.getString("success"))
+        debug("beatmap: $beatMapFile, replay: $replayFile")
+        val parent = File(Config.INSTANCE.outputDir)
 
-        println(RESOURCE_BUNDLE.getFormatString("render", speed))
-        val parent = File("out")
-        if (!parent.isDirectory()) {
-            parent.mkdir()
-        }
-        val outFile = File(parent, "${File(beatMapFile).nameWithoutExtension}.avi")
-        val tempFile = File(parent, "${File(beatMapFile).nameWithoutExtension}_temp.avi")
-        if (outFile.exists()) {
-            outFile.delete()
-        }
-        ReplayMaster.render(beatMap, replayModel, tempFile.absolutePath, speed)
-
-        println(RESOURCE_BUNDLE.getString("attach.bgm"))
+        // TODO: check update
         try {
-            ReplayMaster.attachBgm(beatMap, tempFile, outFile, replayModel.rate)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+            // workspace
+            val tempDir = parent.resolve("temp_dir")
+            if (!parent.isDirectory) {
+                parent.mkdir()
+            }
+            if (tempDir.isDirectory) {
+                tempDir.deleteRecursively()
+            }
+            tempDir.mkdir()
 
-        if (!outFile.exists()) {
-            println("Error: cannot attach BGM to video. Please check if ffmpeg is in the \$PATH\$.")
-            tempFile.copyTo(outFile, true)
-        }
+            // judgement
+            val (beatMap, replayModel, delay) = prepareJudgements(beatMapFile, replayFile, parent, tempDir)
 
-        println(RESOURCE_BUNDLE.getFormatString("render.success", outFile.absolutePath))
-        tempFile.delete()
+            // render
+            logLine("render", Config.INSTANCE.speed)
+            val outFile = File(parent, "${replayFile.nameWithoutExtension}.mp4")
+            val tempFile = File(tempDir, "${replayFile.nameWithoutExtension}.png")
+            if (outFile.exists()) {
+                outFile.delete()
+            }
+            val windowFrameCount = Render(beatMap, replayModel, tempFile).start()
+
+            // bgm
+            try {
+                ReplayMaster.generateVideo(beatMap, tempFile, outFile, replayModel.rate, delay.toInt(), windowFrameCount)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+
+            // finish
+            if (!outFile.exists()) {
+                tempFile.copyTo(outFile, true)
+            }
+            logLine("render.success", outFile.absolutePath)
+            tempDir.deleteRecursively()
+
+            if (!Config.INSTANCE.isServer) {
+                scanner.nextLine()
+                Desktop.getDesktop().open(outFile)
+            }
+        } catch (throwable: Throwable) {
+            if (Config.INSTANCE.isServer) {
+                parent.resolve("error.txt").writeText(StringWriter().apply {
+                    throwable.printStackTrace(PrintWriter(this))
+                }.toString())
+            }
+            throw throwable
+        }
     }
 
     private fun printWelcome() {
@@ -112,20 +170,15 @@ object Main {
         println(space)
     }
 
-    private fun readFile(content: String): String {
-        if (content.startsWith("\"") && content.endsWith("\"")) {
-            return content.substring(1, content.length - 1)
+    private fun readFile(content: String): File {
+        val c = content.trim()
+        if (c.startsWith("\"") && c.endsWith("\"")) {
+            return File(c.substring(1, c.length - 1))
         }
-        return content
+        return File(c)
     }
 
-    private fun onErrorParams(argsSize: Int) {
-        println(RESOURCE_BUNDLE.getFormatString("error.argument", argsSize))
-        println(RESOURCE_BUNDLE.getString("error.argument.hint"))
-        System.exit(-1)
+    private fun checkMD5(beatMapFile: File, md5: String): Boolean {
+        return getMD5(beatMapFile)?.toUpperCase() == md5
     }
-}
-
-fun ResourceBundle.getFormatString(key: String, vararg args: Any?): String {
-    return String.format(getString(key), *args)
 }

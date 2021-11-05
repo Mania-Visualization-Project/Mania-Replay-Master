@@ -97,7 +97,7 @@ void renderActionLN(Mat &image, Note &note, double currentTime) {
     int y = timeToHeight(currentTime - note.timeStamp);
     int h = timeToHeight(note.duration);
     if (y < h) h = y;
-    Scalar color(50, 50, 50);
+    Scalar color(100, 100, 100);
     for (int currentH = ACTION_HEIGHT * 2;
          currentH + ACTION_HEIGHT <= h; currentH += ACTION_HEIGHT * 2) {
         rectangle(image,
@@ -111,9 +111,9 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
     const int dataSize = data.size();
     for (int i = beginIndex; i < dataSize && data[i].timeStamp <= time; i++) {
         auto &note = data[i];
-        if (timeToHeight(time - note.getEndTime()) > GAME_HEIGHT) {
-            continue;
-        }
+//        if (timeToHeight(time - note.getEndTime()) > GAME_HEIGHT) {
+//            continue;
+//        }
         renderNote(image, note, time - note.timeStamp, isBase, note.judgementStart);
 
         if (!isBase && note.duration != 0) { // hold LN, render end
@@ -136,7 +136,7 @@ int render(int beginIndex, vector<Note> &data, double time, Mat &image, bool isB
                               resultPath: String)
  */
 JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
-        (JNIEnv *env, jclass, jint key, jint beatSize, jstring jBeatNotes, jint replaySize,
+        (JNIEnv *env, jclass cls, jint key, jint beatSize, jstring jBeatNotes, jint replaySize,
          jstring jReplayNotes, jstring jPath, jint speed) {
 
     setup(key, speed);
@@ -145,10 +145,12 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
     auto replayNotes = env->GetStringUTFChars(jReplayNotes, JNI_FALSE);
     auto path = env->GetStringUTFChars(jPath, JNI_FALSE);
 
+    jmethodID method = env->GetStaticMethodID(cls, "renderCallback","(I)V");
+
     Size imageSize(GAME_WIDTH, GAME_HEIGHT);
-    VideoWriter writer(string(path), VideoWriter::fourcc('D', 'I', 'V', 'X'), FPS, imageSize);
-    Mat image(imageSize, TYPE_IMAGE);
-    Mat dark(imageSize, TYPE_IMAGE, Scalar::all(0));
+//    VideoWriter writer(string(path), VideoWriter::fourcc('D', 'I', 'V', 'X'), FPS, imageSize);
+//    Mat image(imageSize, TYPE_IMAGE);
+//    Mat dark(imageSize, TYPE_IMAGE, Scalar::all(0));
     vector<Note> beats;
     vector<Note> replay;
 
@@ -163,28 +165,32 @@ JNIEXPORT void JNICALL Java_me_replaymaster_ReplayMaster_nativeRender
     }
 
     auto duration = beats[beatSize - 1].getEndTime() + 2000;
-    cout << "duration: " << duration << "ms" << endl;
     int lastBeat = 0, lastReplay = 0;
 
     int progress = 0;
 
-    for (double time = timeWindow; time < duration; time += TIME_INTERVAL) {
-        dark.copyTo(image);
-        if ((int) (time / duration * 100) > progress) {
-            progress = (int) (time / duration * 100);
-            if (progress % 5 == 0) {
-                cout << progress << "%" << endl;
-            }
-        }
+    Mat scrollImage(Size(GAME_WIDTH, timeToHeight(duration)), TYPE_IMAGE, Scalar::all(0));
+    render(0, beats, duration, scrollImage, true);
+    render(0, replay, duration, scrollImage, false);
+//    imshow("scroll", scrollImage);
+    imwrite(path, scrollImage);
+//    waitKey(0);
 
-        lastBeat = render(lastBeat, beats, time, image, true);
-        lastReplay = render(lastReplay, replay, time, image, false);
+//    for (double time = timeWindow; time < duration; time += TIME_INTERVAL) {
+//        dark.copyTo(image);
+//        if ((int) (time / duration * 100) > progress) {
+//            progress = (int) (time / duration * 100);
+//            env->CallVoidMethod(cls, method, progress);
+//        }
+//
+//        lastBeat = render(lastBeat, beats, time, image, true);
+//        lastReplay = render(lastReplay, replay, time, image, false);
+//
+//        writer.write(image);
+//    }
 
-        writer.write(image);
-    }
-
-    image.release();
-    writer.release();
+//    image.release();
+//    writer.release();
 
     env->ReleaseStringUTFChars(jBeatNotes, beatNotes);
     env->ReleaseStringUTFChars(jReplayNotes, replayNotes);

@@ -1,6 +1,10 @@
 *.avi
 out
+out_test
 cmake-build-debug
+build
+*.txt
+*.yaml
 src/cpp/.idea
 *.dll
 workspace.xml
