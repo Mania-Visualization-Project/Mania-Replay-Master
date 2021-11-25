@@ -1,6 +1,7 @@
 package me.replaymaster
 
 import me.replaymaster.model.BeatMap
+import me.replaymaster.model.Config
 import me.replaymaster.model.Note
 import me.replaymaster.model.ReplayModel
 import java.io.File
@@ -116,6 +117,10 @@ object ReplayMaster {
         }
         if (interProgress >= 100) {
             debug("$stage: ${(System.currentTimeMillis() - startTimes[stage]!!) / 1000.0} s")
+        }
+
+        if (Config.INSTANCE.isServer) {
+            File(Config.INSTANCE.outputDir).resolve("progress.txt").writeText(progress.toString())
         }
 
         // UI

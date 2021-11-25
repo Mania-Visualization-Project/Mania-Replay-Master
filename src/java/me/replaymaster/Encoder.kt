@@ -6,6 +6,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 import java.util.regex.Pattern
+import kotlin.math.ceil
 import kotlin.math.min
 
 class Encoder(
@@ -39,8 +40,8 @@ class Encoder(
         }
 
         val slices = arrayListOf<String>()
-        val intervalProgress = (ReplayMaster.STAGE_SPLICT - ReplayMaster.STAGE_RENDER) / (count / N.toDouble())
-        for (i in 0..count / N) {
+        val intervalProgress = (ReplayMaster.STAGE_SPLICT - ReplayMaster.STAGE_RENDER) / (count.toDouble())
+        for (i in 0 until ceil(count / N.toDouble()).toInt()) {
             val startIndex = N * i
             val endIndex = min(startIndex + N, count) - 1
             val sliceVideo = baseImageFile.absolutePath.replace(".png", "_$i.mp4")
@@ -48,8 +49,8 @@ class Encoder(
             slices.add(sliceVideo)
             generateVideo(startIndex..endIndex, File(sliceVideo), false,
                     "split_$i",
-                    ReplayMaster.STAGE_RENDER + (intervalProgress * i).toInt(),
-                    ReplayMaster.STAGE_RENDER + (intervalProgress * (i + 1)).toInt())
+                    ReplayMaster.STAGE_RENDER + (intervalProgress * startIndex).toInt(),
+                    ReplayMaster.STAGE_RENDER + (intervalProgress * (endIndex + 1)).toInt())
         }
         mergeSlices(slices, duration, "merge", ReplayMaster.STAGE_SPLICT, 100)
     }

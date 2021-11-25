@@ -3,6 +3,7 @@ package me.replaymaster.replay
 import me.replaymaster.Main
 import me.replaymaster.adjust
 import me.replaymaster.debug
+import me.replaymaster.judger.MalodyJudger
 import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Config
@@ -39,6 +40,8 @@ object MalodyReplayReader : IReplayReader {
             it + if (Config.INSTANCE.isMalodyPE) 9 else 0
         }.toDoubleArray()
     }
+
+    override fun getJudger(beatMap: BeatMap, replayModel: ReplayModel) = MalodyJudger(beatMap, replayModel)
 
     override fun readReplay(path: String, beatMap: BeatMap): ReplayModel {
         OsuBinaryInputStream(FileInputStream(path)).use {

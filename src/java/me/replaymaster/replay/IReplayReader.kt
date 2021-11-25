@@ -1,5 +1,6 @@
 package me.replaymaster.replay
 
+import me.replaymaster.judger.IJudger
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.ReplayModel
 import java.io.File
@@ -8,6 +9,7 @@ interface IReplayReader {
     val extension: String
     fun readBeatMapMD5(replayPath: String): String
     fun readReplay(path: String, beatMap: BeatMap): ReplayModel
+    fun getJudger(beatMap: BeatMap, replayModel: ReplayModel): IJudger
 
     companion object {
 

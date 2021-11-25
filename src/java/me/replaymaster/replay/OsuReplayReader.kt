@@ -1,6 +1,8 @@
 package me.replaymaster.replay
 
 import me.replaymaster.adjust
+import me.replaymaster.debug
+import me.replaymaster.judger.OsuJudger
 import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
@@ -9,42 +11,39 @@ import me.replays.Mods
 import me.replays.ReplayData
 import me.replays.parse.ReplayReader
 import java.io.File
-import java.util.*
 
 
 object OsuReplayReader : IReplayReader {
 
     override val extension = "osr"
 
-    private val BASE_JUDGEMENT_OFFSET = doubleArrayOf(16.5, 64.5, 97.5, 127.5, 151.5, 188.5)
-    private val BASE_JUDGEMENT_OFFSET_HR = doubleArrayOf(11.5, 45.5, 69.5, 90.5, 107.5, 133.5)
-    private val BASE_JUDGEMENT_OFFSET_EZ = doubleArrayOf(22.5, 89.5, 135.5, 177.5, 211.5, 263.5)
-
-    private val DECREMENT_NONE = 3.0
-    private val DECREMENT_HR = 2.1
-    private val DECREMENT_EZ = 4.2
+    private val BASE_JUDGEMENT = doubleArrayOf(16.0, 34.0, 67.0, 97.0, 121.0, 158.0)
 
     // This algorithm may have a error less than 1 ms.
     private fun getJudgement(od: Double, replayData: ReplayData): DoubleArray {
-        val result = when {
-            Mods.has(replayData.replay.mods, Mods.HardRock) -> BASE_JUDGEMENT_OFFSET_HR
-            Mods.has(replayData.replay.mods, Mods.Easy) -> BASE_JUDGEMENT_OFFSET_EZ
-            else -> BASE_JUDGEMENT_OFFSET
-        }.copyOf()
-        val decrement = when {
-            Mods.has(replayData.replay.mods, Mods.HardRock) -> DECREMENT_HR
-            Mods.has(replayData.replay.mods, Mods.Easy) -> DECREMENT_EZ
-            else -> DECREMENT_NONE
+        val modeRate = when {
+            Mods.has(replayData.replay.mods, Mods.HardRock) -> 1.0 / 1.4
+            Mods.has(replayData.replay.mods, Mods.Easy) -> 1.4
+            else -> 1.0
         }
-        for (i in 1..result.lastIndex) {
-            result[i] -= decrement * od
+        val result = BASE_JUDGEMENT.mapIndexed { index: Int, d: Double ->
+            var r = d
+            if (index != 0) {
+                r += 3 * (10 - od)
+            }
+            (r * modeRate).toInt().toDouble()
         }
-        return result
+        return result.toDoubleArray()
     }
+
+    override fun getJudger(beatMap: BeatMap, replayModel: ReplayModel) = OsuJudger(beatMap, replayModel)
 
     override fun readReplay(path: String, beatMap: BeatMap): ReplayModel {
 
         val replayData = ReplayData(ReplayReader(File(path)).parse())
+        debug("Judgement results in replay: ${replayData.replay.beat300}, ${replayData.replay.hit300}, " +
+                "${replayData.replay.beat100}, ${replayData.replay.hit100}, ${replayData.replay.hit50}, " +
+                "${replayData.replay.misses}")
         replayData.parse()
 
         var current: Long = 0
@@ -54,7 +53,7 @@ object OsuReplayReader : IReplayReader {
             val action = replayData.actions[i]
             var x = action.x.toInt()
             current += action.w
-            for (j in 0..(beatMap.key - 1)) {
+            for (j in 0 until beatMap.key) {
                 if (x and 1 != 0) {
                     if (holdBeginTime[j] == 0L) holdBeginTime[j] = current
                 } else {
@@ -77,7 +76,7 @@ object OsuReplayReader : IReplayReader {
         logLine("parse.replay.rate", rate)
 
         val judgement = getJudgement(beatMap.od, replayData)
-        logLine("read.beatmap.judgement", Arrays.toString(judgement))
+        logLine("read.beatmap.judgement", judgement.contentToString())
 
         val mirror = replayData.replay.mods and (1 shl 30) != 0
         val replayModel = ReplayModel(list, rate, mirror, judgement)

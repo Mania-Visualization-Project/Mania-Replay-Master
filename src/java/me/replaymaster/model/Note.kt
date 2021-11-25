@@ -1,9 +1,11 @@
 package me.replaymaster.model
 
-data class Note(
+class Note(
         var timeStamp: Long = 0,
         var column: Int = 0,
         var duration: Long = 0,
+        var offSetStart: Int = 0,
+        var offSetEnd: Int = 0,
         var judgementStart: Int = -1, // miss
         var judgementEnd: Int = -1 // LN judgement
 ) : Comparable<Note> {

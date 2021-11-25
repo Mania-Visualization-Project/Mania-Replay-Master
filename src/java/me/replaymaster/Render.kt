@@ -137,12 +137,4 @@ class Render(
         val windowFrameCount = stepSize / pixelPerFrame
         return windowFrameCount
     }
-
-    fun copyImage(source: BufferedImage): BufferedImage {
-        val b = BufferedImage(source.width, source.height, source.type)
-        val g = b.graphics
-        g.drawImage(source, 0, 0, null)
-        g.dispose()
-        return b
-    }
 }

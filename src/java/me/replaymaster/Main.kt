@@ -1,12 +1,12 @@
 package me.replaymaster
 
 
+import com.google.gson.Gson
 import me.replaymaster.beatmap.IMapReader
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Config
 import me.replaymaster.model.ReplayModel
 import me.replaymaster.replay.IReplayReader
-import me.replaymaster.replay.OsuReplayReader
 import org.apache.commons.compress.compressors.CompressorException
 import java.awt.Desktop
 import java.io.File
@@ -56,7 +56,14 @@ object Main {
         val replayModel = replayReader.readReplay(replayFile.absolutePath, beatMap)
 
         logLine("judgement.generate")
-        ReplayMaster.judge(beatMap, replayModel, replayReader is OsuReplayReader)
+        val judger = replayReader.getJudger(beatMap, replayModel)
+        judger.judge()
+
+        if (Config.INSTANCE.exportJudgementResults) {
+            val exportFile = parent.resolve("judgement_${replayFile.nameWithoutExtension}.json")
+            logLine("judgement.export", exportFile.absolutePath)
+            exportFile.writeText(Gson().toJson(replayModel.replayData))
+        }
 
         val delay = 1000L
         beatMap.notes.forEach { it.timeStamp += delay }
@@ -95,6 +102,7 @@ object Main {
 
         debug("beatmap: $beatMapFile, replay: $replayFile")
         val parent = File(Config.INSTANCE.outputDir)
+        Config.refresh(yamlPath)
 
         // TODO: check update
         try {
@@ -132,7 +140,10 @@ object Main {
                 tempFile.copyTo(outFile, true)
             }
             logLine("render.success", outFile.absolutePath)
-            tempDir.deleteRecursively()
+
+            if (!Config.INSTANCE.debug) {
+                tempDir.deleteRecursively()
+            }
 
             if (!Config.INSTANCE.isServer) {
                 scanner.nextLine()

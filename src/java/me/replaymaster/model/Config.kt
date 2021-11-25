@@ -28,7 +28,8 @@ data class Config(
         var outputDir: String = "out",
         var isServer: Boolean = false,
         var maxStepSize: Int = 3000,
-        var ffmpegMaxProcessingSize: Int = 20
+        var ffmpegMaxProcessingSize: Int = 20,
+        var exportJudgementResults: Boolean = false
 ) {
 
     companion object {
@@ -37,12 +38,18 @@ data class Config(
         fun init(yamlPath: File) {
             if (yamlPath.exists()) {
                 debug("Config exists!")
-                INSTANCE = Yaml().load("!!me.replaymaster.model.Config\n" + yamlPath.readText())
+                refresh(yamlPath)
             } else {
                 yamlPath.writeText(defaultSetting)
             }
             logLine("config.hint", yamlPath.absolutePath)
             println()
+        }
+
+        fun refresh(yamlPath: File) {
+            if (yamlPath.exists()) {
+                INSTANCE = Yaml().load("!!me.replaymaster.model.Config\n" + yamlPath.readText())
+            }
         }
 
         val defaultSetting = """
@@ -74,6 +81,7 @@ data class Config(
             
             # Advanced
             outputDir: 'out'
+            exportJudgementResults: false
             codec: libx264
             debug: false
         """.trimIndent()
