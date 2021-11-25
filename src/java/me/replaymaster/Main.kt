@@ -151,9 +151,10 @@ object Main {
             }
         } catch (throwable: Throwable) {
             if (Config.INSTANCE.isServer) {
-                parent.resolve("error.txt").writeText(StringWriter().apply {
-                    throwable.printStackTrace(PrintWriter(this))
-                }.toString())
+//                parent.resolve("error.txt").writeText(StringWriter().apply {
+//                    throwable.printStackTrace(PrintWriter(this))
+//                }.toString())
+                parent.resolve("error.txt").writeText(throwable.toString())
             }
             throw throwable
         }

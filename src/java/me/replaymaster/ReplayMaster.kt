@@ -101,7 +101,13 @@ object ReplayMaster {
 
     @JvmStatic
     fun generateVideo(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, delay: Int,
-                      windowFrameCount: Int, ffmpegPath: String = "ffmpeg") {
+                      windowFrameCount: Int) {
+        var ffmpegPath = File("ffmpeg.exe").absolutePath
+        debug("FFMPEG path1: ${ffmpegPath}")
+        if (!File(ffmpegPath).exists()) {
+            ffmpegPath = "ffmpeg"
+        }
+        debug("FFMPEG path2: ${ffmpegPath}")
         Encoder(beatMap, videoFile, outFile, rate, delay, windowFrameCount, ffmpegPath).generateVideo()
     }
 
