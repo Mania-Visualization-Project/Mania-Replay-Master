@@ -103,6 +103,7 @@ object Main {
         debug("beatmap: $beatMapFile, replay: $replayFile")
         val parent = File(Config.INSTANCE.outputDir)
         Config.refresh(yamlPath)
+        val startTime = System.currentTimeMillis()
 
         // TODO: check update
         try {
@@ -141,6 +142,8 @@ object Main {
             }
             logLine("render.success", outFile.absolutePath)
 
+            Monitor.reportTask(startTime, beatMapFile, replayFile, File(beatMap.bgmPath), "")
+
             if (!Config.INSTANCE.debug) {
                 tempDir.deleteRecursively()
             }
@@ -156,6 +159,11 @@ object Main {
 //                }.toString())
                 parent.resolve("error.txt").writeText(throwable.toString())
             }
+
+            Monitor.reportTask(startTime, beatMapFile, replayFile, null, StringWriter().apply {
+                    throwable.printStackTrace(PrintWriter(this))
+            }.toString())
+
             throw throwable
         }
     }
