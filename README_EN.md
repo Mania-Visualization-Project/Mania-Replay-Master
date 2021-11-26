@@ -32,7 +32,7 @@ Demo: https://www.bilibili.com/video/av84322571/
 
 ## Usage
 
-First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.0/ManiaReplayMaster.v2.0.zip) to download the tool kit.
+First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.1/ManiaReplayMaster.v2.1.zip) to download the tool kit.
 
 Second, please ensure that you have installed Java (at least version 8.0)
 

@@ -32,13 +32,13 @@ ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。�
 
 ## 使用方法
 
-首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.0/ManiaReplayMaster.v2.0.zip)下载工具包。
+首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.1/ManiaReplayMaster.v2.1.zip)下载工具包。
 
 其次，确保已经成功安装 Java 8.0 以上版本。
 
 最后，双击`ManiaReplayMaster.bat`批处理脚本，按照提示输入谱面路径、回放路径。
 
-## LICENSE
+## LICENSEf
 
 ```
 Copyright (c) 2020-present, project contributors.
