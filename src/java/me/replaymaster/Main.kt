@@ -42,7 +42,9 @@ object Main {
                     }
             ) { "Cannot find the beatmap with the given replay file with MD5: $md5" }
         } else {
-            check(checkMD5(beatMapFile, md5)) { "The beatmap cannot match the given replay file with MD5: $md5" }
+            if (!checkMD5(beatMapFile, md5)) {
+                logLine("warning.md5", md5)
+            }
         }
 
         val beatMapReader = checkNotNull(IMapReader.matchMapReader(beatMapFile)) {
