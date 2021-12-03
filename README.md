@@ -38,7 +38,7 @@ ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。�
 
 最后，双击`ManiaReplayMaster.bat`批处理脚本，按照提示输入谱面路径、回放路径。
 
-## LICENSEf
+## LICENSE
 
 ```
 Copyright (c) 2020-present, project contributors.
