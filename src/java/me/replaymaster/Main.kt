@@ -20,7 +20,7 @@ object Main {
     var judgementFromReplay = listOf<Int>()
     var judgementFromJudging = listOf<Int>()
 
-    fun prepareJudgements(beatMapFileParam: File, replayFile: File, parent: File, tempDir: File): Triple<BeatMap, ReplayModel, Long> {
+    private fun prepareJudgements(beatMapFileParam: File, replayFile: File, parent: File, tempDir: File): Triple<BeatMap, ReplayModel, Long> {
         var beatMapFile = beatMapFileParam
         val replayReader = checkNotNull(IReplayReader.matchReplayReader(replayFile)) {
             "Invalid replay file: ${replayFile.absolutePath}"
@@ -35,16 +35,19 @@ object Main {
         }
         if (beatMapFile.isDirectory) {
             logLine("read.beatmap.dir", beatMapFile.absolutePath)
-            beatMapFile = checkNotNull(
-                    beatMapFile.walk().filter { IMapReader.matchMapReader(it) != null }.firstOrNull {
-                        if (it.isDirectory) false
-                        else getMD5(it)?.toUpperCase() == md5
-                    }
-            ) { "Cannot find the beatmap with the given replay file with MD5: $md5" }
-        } else {
-            if (!checkMD5(beatMapFile, md5)) {
-                logLine("warning.md5", md5)
+            val candidates = beatMapFile.walk().filter {
+                IMapReader.matchMapReader(it) != null && !it.isDirectory
+            }.toList()
+            beatMapFile = if (candidates.size == 1) {
+                candidates[0]
+            } else {
+                checkNotNull(candidates.firstOrNull {
+                    checkMD5(it, md5)
+                }) { "Cannot find the beatmap with the given replay file with MD5: $md5" }
             }
+        }
+        if (!checkMD5(beatMapFile, md5)) {
+            logLine("warning.md5", md5)
         }
 
         val beatMapReader = checkNotNull(IMapReader.matchMapReader(beatMapFile)) {
@@ -88,7 +91,7 @@ object Main {
         Config.init(yamlPath)
 
         val scanner = Scanner(System.`in`)
-        val beatMapFile = if (args.size > 0) {
+        val beatMapFile = if (args.isNotEmpty()) {
             readFile(args[0])
         } else {
             logLine("hint.beatmap")
@@ -139,9 +142,8 @@ object Main {
             }
 
             // finish
-            if (!outFile.exists()) {
-                tempFile.copyTo(outFile, true)
-            }
+            check(outFile.exists()) { "generated file failed!" }
+
             logLine("render.success", outFile.absolutePath)
 
             Monitor.reportTask(startTime, beatMapFile, replayFile, File(beatMap.bgmPath), "")

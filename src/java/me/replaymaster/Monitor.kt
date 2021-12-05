@@ -14,6 +14,9 @@ object Monitor {
         if (Config.INSTANCE.isServer) {
             return
         }
+        if (Config.INSTANCE.debug) {
+            return
+        }
         Thread {
             request("report_offline", "POST", Gson().toJson(ReportContent(
                     map = beatMap.name, replay = replay.name, bgm = bgm?.name ?: "",

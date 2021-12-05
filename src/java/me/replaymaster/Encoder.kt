@@ -24,6 +24,14 @@ class Encoder(
     private val N = Config.INSTANCE.ffmpegMaxProcessingSize
 
     fun generateVideo() {
+        if (beatMap.bgmPath == BeatMap.MUTE_MUSIC) {
+            beatMap.bgmPath = baseImageFile.parentFile.resolve(beatMap.bgmPath).absolutePath
+            debug("Generate mute sound: ${beatMap.bgmPath}")
+            runFFMPEG(
+                    arrayListOf("-f", "lavfi", "-t", "1", "-i", "anullsrc", beatMap.bgmPath, "-y"),
+                    File(beatMap.bgmPath), 0.0, "", 0, 0)
+        }
+
         var count = 0
         while (true) {
             if (File(getImageSliceName(count)).exists()) {
@@ -63,7 +71,6 @@ class Encoder(
                 "[a1]adelay=$audioDelay|$audioDelay[audio]"
         )
         val command = arrayListOf(
-                ffmpegPath,
                 "-i", beatMap.bgmPath
         )
         val outVideos = arrayListOf<String>()
@@ -109,9 +116,7 @@ class Encoder(
             )
         }
         filterGraph.add("${outVideos.joinToString("")}concat=n=${inputIndices.toList().size}:v=1[video]")
-        val command = arrayListOf(
-                ffmpegPath
-        )
+        val command = arrayListOf<String>()
         if (isFinal) {
             command.addAll(listOf("-i", beatMap.bgmPath))
             filterGraph.addAll(listOf(
@@ -136,11 +141,12 @@ class Encoder(
         runFFMPEG(command, out, sliceDuration * inputIndices.size, stage, startProgress, endProgress)
     }
 
-    private fun runFFMPEG(command: List<String>, out: File, expectedDuration: Double, stage: String, startProgress: Int, endProgress: Int) {
+    private fun runFFMPEG(command: MutableList<String>, out: File, expectedDuration: Double, stage: String, startProgress: Int, endProgress: Int) {
+        command.add(0, ffmpegPath)
+
         if (Config.INSTANCE.isServer) {
             debug(command.joinToString(" "))
         }
-
         val startTime = System.currentTimeMillis()
 
         val ffmpeg = ProcessBuilder()
@@ -161,20 +167,22 @@ class Encoder(
         val timeParser = Pattern.compile("time=(\\d+:\\d+:\\d+\\.\\d+)\\s")
         while (true) {
             line = stdout.readLine() ?: break
-            val matcher = timeParser.matcher(line)
-            if (Config.INSTANCE.isServer) {
-                debug("[FFMPEG] $line")
-            }
-            if (matcher.find()) {
-                val timeRead = parseTime(matcher.group(1))
-                val currentProgress = (timeRead.toDouble() / expectedDuration * 100)
-                ReplayMaster.printProgress(stage, startProgress, endProgress, currentProgress)
+            debug("[FFMPEG] $line")
+            if (expectedDuration != 0.0) {
+                val matcher = timeParser.matcher(line)
+                if (matcher.find()) {
+                    val timeRead = parseTime(matcher.group(1))
+                    val currentProgress = (timeRead.toDouble() / expectedDuration * 100)
+                    ReplayMaster.printProgress(stage, startProgress, endProgress, currentProgress)
+                }
             }
         }
 
         ffmpeg.waitFor()
         stdout.close()
-        ReplayMaster.printProgress(stage, startProgress, endProgress, 100.0)
+        if (expectedDuration != 0.0) {
+            ReplayMaster.printProgress(stage, startProgress, endProgress, 100.0)
+        }
         debug("Render duration: ${(System.currentTimeMillis() - startTime) / 1000} s")
 
         check(out.exists()) { "FFMPEG generated file failed!: ${out.absolutePath}" }

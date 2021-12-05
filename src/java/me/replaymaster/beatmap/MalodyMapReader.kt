@@ -6,11 +6,6 @@ import me.replaymaster.model.Note
 import java.io.File
 
 private class MalodyBPMStamp(val time: Double, val bpm: Double, val beatValue: Double)
-//    : Comparable<MalodyBPMStamp> {
-//    override fun compareTo(other: MalodyBPMStamp): Int {
-//        return beatValue.compareTo(other.beatValue)
-//    }
-//}
 
 object MalodyMapReader : IMapReader {
 
