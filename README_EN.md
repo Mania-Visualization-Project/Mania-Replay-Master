@@ -13,6 +13,8 @@ Supported game:
 - osu!mania
 - Malody 4.x (key mode)
 
+Online rendering website: http://keytoix.vip/mania/
+
 ## Screenshot
 
 Demo: https://www.bilibili.com/video/av84322571/
@@ -32,7 +34,13 @@ Demo: https://www.bilibili.com/video/av84322571/
 
 ## Usage
 
-First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.1/ManiaReplayMaster.v2.1.zip) to download the tool kit.
+### Method 1: online rendering
+
+http://keytoix.vip/mania/
+
+### Method 2: local rendering
+
+First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.2.2/ManiaReplayMaster.v2.2.2.zip) to download the tool kit.
 
 Second, please ensure that you have installed Java (at least version 8.0)
 
