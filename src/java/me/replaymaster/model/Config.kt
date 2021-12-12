@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.File
 
 data class Config(
-        var speed: Int = 15,
+        var speed: Int = 20,
         var width: Int = 540,
         var height: Int = 960,
         var stroke: Int = 3,
@@ -54,7 +54,7 @@ data class Config(
 
         val defaultSetting = """
             # Falling down speed, in pixel / frame
-            speed: 15
+            speed: 20
             
             # FPS: frame / second
             framePerSecond: 60

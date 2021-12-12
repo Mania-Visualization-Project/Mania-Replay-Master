@@ -13,6 +13,7 @@ import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.lang.IllegalArgumentException
 import java.util.*
 
 object Main {
@@ -25,7 +26,11 @@ object Main {
         val replayReader = checkNotNull(IReplayReader.matchReplayReader(replayFile)) {
             "Invalid replay file: ${replayFile.absolutePath}"
         }
-        val md5 = replayReader.readBeatMapMD5(replayFile.absolutePath).toUpperCase()
+        val md5 = try {
+            replayReader.readBeatMapMD5(replayFile.absolutePath).toUpperCase()
+        } catch (t: Throwable) {
+            throw IllegalArgumentException("Invalid replay file: ${replayFile.absolutePath}", t)
+        }
         if (!beatMapFile.isDirectory && IMapReader.isZipMap(beatMapFile)) {
             val unzipPath = tempDir.resolve("temp_map")
             unzipPath.mkdir()
@@ -50,15 +55,19 @@ object Main {
             logLine("warning.md5", md5)
         }
 
-        val beatMapReader = checkNotNull(IMapReader.matchMapReader(beatMapFile)) {
-            "Invalid beatmap file: ${beatMapFile.absolutePath}"
+        logLine("read.beatmap", beatMapFile.path)
+        val beatMap = try {
+            IMapReader.matchMapReader(beatMapFile)!!.readMap(beatMapFile.absolutePath)
+        } catch (t: Throwable) {
+            throw IllegalArgumentException("Invalid beatmap file: ${replayFile.absolutePath}", t)
         }
 
-        logLine("read.beatmap", beatMapFile.path)
-        val beatMap = beatMapReader.readMap(beatMapFile.absolutePath)
-
         logLine("read.replay", replayFile.path)
-        val replayModel = replayReader.readReplay(replayFile.absolutePath, beatMap)
+        val replayModel = try {
+            replayReader.readReplay(replayFile.absolutePath, beatMap)
+        } catch (t: Throwable) {
+            throw IllegalArgumentException("Invalid replay file: ${replayFile.absolutePath}", t)
+        }
 
         logLine("judgement.generate")
         val judger = replayReader.getJudger(beatMap, replayModel)
