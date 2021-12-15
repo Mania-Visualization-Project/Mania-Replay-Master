@@ -103,10 +103,15 @@ class Encoder(
             val fileIndex = inputIndices[i]
             val path = getImageSliceName(fileIndex)
             val inputFileIndex = if (isFinal) i + 1 else i
+            val transpose = if (beatMap.isTaiko) {
+                ",transpose=1"
+            } else {
+                ""
+            }
             filterGraph.addAll(listOf(
                     "color=s=${Config.INSTANCE.width}*${Config.INSTANCE.height},fps=${Config.INSTANCE.framePerSecond}[bg$i]",
                     "[bg$i][$inputFileIndex]overlay=y=-h+H+t*${Config.INSTANCE.framePerSecond * Config.INSTANCE.speed}:shortest=1[video${i}l]",
-                    "[video${i}l]trim=end=$sliceDuration[video${i}]"
+                    "[video${i}l]trim=end=$sliceDuration$transpose[video${i}]"
             ))
             outVideos.add("[video$i]")
             subcommands.addAll(listOf(

@@ -5,7 +5,7 @@ import me.replaymaster.model.Note
 import me.replaymaster.model.ReplayModel
 import kotlin.math.abs
 
-class OsuJudger(
+class OsuManiaJudger(
         beatMap: BeatMap,
         replayModel: ReplayModel
 ) : BaseJudger(beatMap, replayModel) {
@@ -22,6 +22,9 @@ class OsuJudger(
     private val LNHasJudged = HashSet<Note>()
 
     override fun canHit(action: Note, note: Note): Int {
+        if (action.column != note.column) {
+            return IGNORE
+        }
         var diff = action.timeStamp - note.timeStamp
         if (-diff > judgementWindow[J_MISS]) {
             return TOO_EARLY
@@ -37,7 +40,12 @@ class OsuJudger(
         } else {
             isTooLate = diff >= judgementWindow[J_100]
         }
-        return if (isTooLate) TOO_LATE else HIT
+        return if (isTooLate)
+            TOO_LATE
+        else if (note.duration == 0L)
+            HIT
+        else
+            HIT_AND_CAN_HIT_AGAIN
     }
 
     private fun isLNJudgedWith(startDiff: Long, totalDiff: Long, judgement: Int, rate: Double): Boolean {

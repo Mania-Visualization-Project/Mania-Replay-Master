@@ -59,8 +59,9 @@ object Main {
         val beatMap = try {
             IMapReader.matchMapReader(beatMapFile)!!.readMap(beatMapFile.absolutePath)
         } catch (t: Throwable) {
-            throw IllegalArgumentException("Invalid beatmap file: ${replayFile.absolutePath}", t)
+            throw IllegalArgumentException("Invalid beatmap file: ${beatMapFile.absolutePath}", t)
         }
+        beatMap.checkValidation()
 
         logLine("read.replay", replayFile.path)
         val replayModel = try {
@@ -68,6 +69,7 @@ object Main {
         } catch (t: Throwable) {
             throw IllegalArgumentException("Invalid replay file: ${replayFile.absolutePath}", t)
         }
+        beatMap.duration = maxOf(replayModel.replayData.last().endTime, beatMap.notes.last().endTime) + 2000L
 
         logLine("judgement.generate")
         val judger = replayReader.getJudger(beatMap, replayModel)

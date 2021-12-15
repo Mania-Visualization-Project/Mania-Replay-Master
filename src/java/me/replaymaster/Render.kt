@@ -9,10 +9,7 @@ import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 class Render(
         private val beatMap: BeatMap,
@@ -28,9 +25,9 @@ class Render(
     private val columnWidth = Config.INSTANCE.width / beatMap.key
     private val h = Config.INSTANCE.height
     private val H = ensureMultiple(timeToHeight(beatMap.duration.toDouble()), Config.INSTANCE.speed)
-    val stepSize = ensureMultiple(Config.INSTANCE.maxStepSize.toDouble(), pixelPerFrame)
-    val N = ceil((H - h).toDouble() / stepSize).toInt()
-    val windowSize = stepSize + h
+    private val stepSize = ensureMultiple(Config.INSTANCE.maxStepSize.toDouble(), pixelPerFrame)
+    private val N = ceil((H - h).toDouble() / stepSize).toInt()
+    private val windowSize = stepSize + h
 
     private val bufferedImage = BufferedImage(Config.INSTANCE.width, windowSize, BufferedImage.TYPE_INT_ARGB)
     private var graphics2D = bufferedImage.createGraphics()
@@ -82,7 +79,7 @@ class Render(
         } else {
             Config.INSTANCE.missColor
         }
-        val color = Color(Integer.parseInt(colorText, 16))
+        val color = readColor(colorText)
         x += columnWidth * 0.1
         width -= 2 * columnWidth * 0.1
         rectangle(x.toInt() to y.toInt(),
@@ -101,16 +98,35 @@ class Render(
         while (currentH + actionHeight <= h) {
             rectangle((x - width) to (y - currentH),
                     (x + width) to (y - currentH - actionHeight),
-                    Color(Integer.parseInt(Config.INSTANCE.longNoteColor, 16)),
+                    readColor(Config.INSTANCE.longNoteColor),
                     -1)
             currentH += actionHeight * 2
         }
     }
 
+    private fun renderConnectionLine(time: Double, leftNote: Note, rightNote: Note) {
+        val start = (leftNote.column + 1) * columnWidth - columnWidth * 0.1
+        val end = rightNote.column * columnWidth + columnWidth * 0.1
+        val y = timeToHeight(time) - Config.INSTANCE.blockHeight.toDouble() / 2
+        val width: Int = Config.INSTANCE.actionHeight / 2
+        rectangle(
+                start.toInt() to (y - width).toInt(),
+                end.toInt() to (y + width).toInt(),
+                readColor(Config.INSTANCE.longNoteColor),
+                -1
+        )
+    }
+
     private fun render(data: List<Note>, time: Double, isBase: Boolean) {
         for (note in data) {
+            if (isBase && note.duelNote != null && note.column <= 1) {
+                // taiko big note: draw a connection line
+                renderConnectionLine(time - note.timeStamp, note, note.duelNote!!)
+            }
+        }
+        for (note in data) {
             renderNote(note, time - note.timeStamp, isBase, note.judgementStart)
-            if (!isBase && note.duration != 0L) { // hold LN, render end
+            if (!isBase && note.showAsLN) { // hold LN, render end
                 renderNote(note, time - note.endTime, false,
                         note.judgementEnd)
                 renderActionLN(note, time)
@@ -125,6 +141,17 @@ class Render(
         while (currentStart < H) {
 
             clear()
+            if (beatMap.isTaiko) {
+                graphics2D.run {
+                    val w = bufferedImage.width / 4
+                    paint = readColor(Config.INSTANCE.taikoBackgroundBlue)
+                    fillRect(0, 0, w, bufferedImage.height)
+                    fillRect(w * 3, 0, w, bufferedImage.height)
+                    paint = readColor(Config.INSTANCE.taikoBackgroundRed)
+                    fillRect(w, 0, w * 2, bufferedImage.height)
+                }
+            }
+
             render(beatMap.notes, heightToTime(currentStart + windowSize), true)
             render(replayModel.replayData, heightToTime(currentStart + windowSize), false)
 
@@ -136,5 +163,19 @@ class Render(
         }
         val windowFrameCount = stepSize / pixelPerFrame
         return windowFrameCount
+    }
+
+    private fun readColor(colorHex: String): Color {
+        return when (colorHex.length) {
+            6 -> {
+                Color(Integer.parseInt(colorHex, 16))
+            }
+            8 -> {
+                Color(Integer.parseInt(colorHex, 16), true)
+            }
+            else -> {
+                error("Unknown colorHex: $colorHex")
+            }
+        }
     }
 }

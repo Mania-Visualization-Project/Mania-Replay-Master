@@ -9,6 +9,9 @@ class MalodyJudger(
         replayModel: ReplayModel
 ) : BaseJudger(beatMap, replayModel) {
     override fun canHit(action: Note, note: Note): Int {
+        if (action.column != note.column) {
+            return IGNORE
+        }
         val diff = action.timeStamp - note.timeStamp
         return if (diff < -judgementWindow.last()) {
             TOO_EARLY

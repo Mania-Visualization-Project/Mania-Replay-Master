@@ -15,12 +15,14 @@ data class Config(
         var framePerSecond: Int = 60,
         var isMalodyPE: Boolean = true,
         var judgementColor: List<String> = listOf(
-                "FFFFFF", // max, best
-                "FFD237", // 300, cool
+                "FFFFFF", // max, best, taiko_300
+                "FFD237", // 300, cool, taiko_100
                 "79D020", // 200, good
                 "1E68C5", // 100
                 "E1349B" // 50
         ),
+        var taikoBackgroundRed: String = "30ED402F",
+        var taikoBackgroundBlue: String = "30488FAD",
         var missColor: String = "FF0000",
         var longNoteColor: String = "646464",
         var debug: Boolean = false,
@@ -69,7 +71,7 @@ data class Config(
             blockHeight: 40 # note height
             stroke: 3
             
-            # Judgement colors
+            # Colors
             judgementColor:
               - FFFFFF
               - FFD237
@@ -78,6 +80,8 @@ data class Config(
               - E1349B
             longNoteColor: '646464'
             missColor: FF0000
+            taikoBackgroundRed: 30ED402F
+            taikoBackgroundBlue: 30488FAD
             
             # Advanced
             outputDir: 'out'

@@ -11,7 +11,9 @@ import kotlin.math.abs
 
 internal const val TOO_EARLY = -1
 internal const val HIT = 0
-internal const val TOO_LATE = 1
+internal const val HIT_AND_CAN_HIT_AGAIN = 1
+internal const val TOO_LATE = 2
+internal const val IGNORE = 3
 
 interface IJudger {
     fun judge()
@@ -27,9 +29,16 @@ abstract class BaseJudger(
 
     abstract fun canHit(action: Note, note: Note): Int
 
-    abstract fun judgeRelease(action: Note, target: Note): Boolean
+    open fun judgeRelease(action: Note, target: Note): Boolean {
+        return false
+    }
 
-    internal fun getJudgement(diff: Double): Int {
+    open fun onFindTarget(action: Note, target: Note) {
+        action.offSetStart = (action.timeStamp - target.timeStamp).toInt()
+        action.offSetEnd = (action.endTime - target.endTime).toInt()
+    }
+
+    open fun getJudgement(diff: Double, note: Note? = null, action: Note? = null): Int {
         for (i in 0 until (judgementWindow.size - 1)) {
             if (diff <= judgementWindow[i]) {
                 return i
@@ -44,27 +53,28 @@ abstract class BaseJudger(
         while (listNode.hasNext()) {
             val note = listNode.next()
             var shouldDelete = false
-            if (note.column == action.column) {
-                val canHit = canHit(action, note)
-                if (canHit == TOO_EARLY) break
-                if (canHit == TOO_LATE || cannotJudge.contains(note)) {
-                    shouldDelete = true
-                } else { // hit!
+            val canHit = canHit(action, note)
+            when {
+                canHit == IGNORE -> continue
+                canHit == TOO_EARLY -> break
+                canHit == TOO_LATE || cannotJudge.contains(note) -> shouldDelete = true
+                else -> {
+                    // hit!
                     if (candidate == null) {
                         candidate = note
-                        if (note.duration == 0L) {
+                        if (canHit != HIT_AND_CAN_HIT_AGAIN) {
                             cannotJudge.add(note)
                         }
+                        break
                     }
                 }
-                if (shouldDelete) {
-                    listNode.remove()
-                }
+            }
+            if (shouldDelete) {
+                listNode.remove()
             }
         }
         candidate?.let { notNullCandidate ->
-            action.offSetStart = (action.timeStamp - notNullCandidate.timeStamp).toInt()
-            action.offSetEnd = (action.endTime - notNullCandidate.endTime).toInt()
+            onFindTarget(action, notNullCandidate)
         }
         return candidate
     }
@@ -73,14 +83,14 @@ abstract class BaseJudger(
         for (action in replayModel.replayData) {
             val target = findTarget(action)
             if (target == null) {
-                action.duration = 0
+                action.showAsLN = false
                 continue
             }
-            val judgement = getJudgement(abs(action.timeStamp - target.timeStamp).toDouble())
+            val judgement = getJudgement(abs(action.timeStamp - target.timeStamp).toDouble(), target, action)
             action.judgementStart = judgement
             target.judgementStart = judgement
             if (target.duration == 0L) {
-                action.duration = 0
+                action.showAsLN = false
             } else {
                 val canBeJudgedAgain = judgeRelease(action, target)
                 if (!canBeJudgedAgain) {
