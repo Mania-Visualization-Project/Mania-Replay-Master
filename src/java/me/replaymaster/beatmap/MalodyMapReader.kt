@@ -1,6 +1,7 @@
 package me.replaymaster.beatmap
 
 import com.google.gson.Gson
+import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
 import java.io.File
@@ -46,8 +47,10 @@ object MalodyMapReader : IMapReader {
                     val column = it.column!!
                     Note(startTime.toLong(), column, endTime.toLong() - startTime.toLong())
                 }
+        logLine("read.beatmap.mode", "malody:key")
 
-        return BeatMap(key, noteList, File(path).parentFile.resolve(bgmName).absolutePath, bgmOffset = offset.toInt())
+        return BeatMap(key, noteList, File(path).parentFile.resolve(bgmName).absolutePath, bgmOffset = offset.toInt(),
+                gameMode = "malody:key")
     }
 
     private fun beatToTime(beatValue: Double, lastStamp: MalodyBPMStamp): Double {

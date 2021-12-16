@@ -10,7 +10,7 @@ import java.net.URL
 
 object Monitor {
 
-    fun reportTask(startTime: Long, beatMap: File, replay: File, bgm: File?, error: String) {
+    fun reportTask(startTime: Long, beatMap: File, replay: File, bgm: File?, error: String, gameMode: String) {
         if (Config.INSTANCE.isServer) {
             return
         }
@@ -21,6 +21,7 @@ object Monitor {
             request("report_offline", "POST", Gson().toJson(ReportContent(
                     map = beatMap.name, replay = replay.name, bgm = bgm?.name ?: "",
                     startTime = startTime, endTime = System.currentTimeMillis(),
+                    gameMode = gameMode, extra = Gson().toJson(Config.INSTANCE),
                     version = RESOURCE_BUNDLE.getString("app.version"), error = error
             )))
         }.start()
@@ -28,7 +29,8 @@ object Monitor {
 
     fun request(api: String, method: String, data: String?): String? {
         try {
-            val url = URL("http://1.116.195.211/mania/api/" + api)
+            val url = URL("http://keytoix.vip/mania/api/" + api)
+//            val url = URL("http://127.0.0.1:8000/mania/api/" + api)
             val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
             var out: PrintWriter? = null
             conn.setRequestMethod(method)
@@ -74,6 +76,10 @@ class ReportContent(
         val startTime: Long,
         @SerializedName("end_time")
         val endTime: Long,
+        @SerializedName("extra")
+        val extra: String,
+        @SerializedName("game_mode")
+        val gameMode: String,
         @SerializedName("version")
         val version: String,
         @SerializedName("error")

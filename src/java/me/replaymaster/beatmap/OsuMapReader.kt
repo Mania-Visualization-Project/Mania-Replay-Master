@@ -31,14 +31,15 @@ object OsuMapReader : IMapReader {
             "Mode" -> {
                 if (value == "1") {
                     beatMap.type = BeatMap.TYPE_TAIKO
+                    beatMap.gameMode = "osu!taiko"
                     beatMap.key = 4
-                    logLine("read.beatmap.mode", "osu!takio")
                 } else if (value == "3") {
                     beatMap.type = BeatMap.TYPE_MANIA
-                    logLine("read.beatmap.mode", "osu!mania")
+                    beatMap.gameMode = "osu!mania"
                 } else {
                     throw IllegalArgumentException("Not support this kind of map!")
                 }
+                logLine("read.beatmap.mode", beatMap.gameMode)
             }
 
             "SliderMultiplier" -> {

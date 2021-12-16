@@ -10,7 +10,8 @@ data class BeatMap(
         var bgmOffset: Int = 0,
         var od: Double = 0.0,  // osu!
         var type: Int = TYPE_MANIA,
-        var sliderMultiplier: Double? = null // osu!taiko
+        var sliderMultiplier: Double? = null, // osu!taiko
+        var gameMode: String = ""
 ) {
 
     companion object {

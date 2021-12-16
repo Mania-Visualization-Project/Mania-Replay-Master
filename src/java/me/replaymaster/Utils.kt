@@ -32,7 +32,7 @@ fun debug(content: String) {
 }
 
 fun warning(key: String, vararg args: Any? = arrayOf()) {
-    logLine(key, args)
+    logLine(key, *args)
     if (Config.INSTANCE.isDesktop) {
         println("warning: $key")
     }

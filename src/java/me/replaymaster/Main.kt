@@ -63,6 +63,9 @@ object Main {
             throw IllegalArgumentException("Invalid beatmap file: ${beatMapFile.absolutePath}", t)
         }
         beatMap.checkValidation()
+        if (Config.INSTANCE.isServer) {
+            parent.resolve("game_mode.txt").writeText(beatMap.gameMode)
+        }
 
         logLine("read.replay", replayFile.path)
         val replayModel = try {
@@ -148,7 +151,6 @@ object Main {
             }
             val windowFrameCount = Render(beatMap, replayModel, tempFile).start()
 
-            // bgm
             try {
                 ReplayMaster.generateVideo(beatMap, tempFile, outFile, replayModel.rate, delay.toInt(), windowFrameCount)
             } catch (ex: Exception) {
@@ -163,7 +165,7 @@ object Main {
                 println("out: ${outFile.absolutePath}")
             }
 
-            Monitor.reportTask(startTime, beatMapFile, replayFile, File(beatMap.bgmPath), "")
+            Monitor.reportTask(startTime, beatMapFile, replayFile, File(beatMap.bgmPath), "", beatMap.gameMode)
 
             if (!Config.INSTANCE.debug) {
                 tempDir.deleteRecursively()
@@ -183,7 +185,7 @@ object Main {
 
             Monitor.reportTask(startTime, beatMapFile, replayFile, null, StringWriter().apply {
                 throwable.printStackTrace(PrintWriter(this))
-            }.toString())
+            }.toString(), "")
 
             if (Config.INSTANCE.isDesktop) {
                 println("error: ${parseExceptionCode(throwable)}")
