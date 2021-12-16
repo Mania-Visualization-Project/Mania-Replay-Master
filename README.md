@@ -11,6 +11,7 @@ ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。�
 
 支持游戏：
 - osu!mania
+- osu!taiko (beta 测试)
 - Malody key mode (4.x 版本)
 
 在线渲染网站：http://keytoix.vip/mania/
@@ -40,7 +41,7 @@ http://keytoix.vip/mania/
 
 ### 方法二、本地渲染
 
-首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.2.2/ManiaReplayMaster.v2.2.2.zip)下载工具包。
+首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3/ManiaReplayMaster.v2.3.zip)下载工具包。
 
 其次，确保已经成功安装 Java 8.0 以上版本。
 

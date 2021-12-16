@@ -11,6 +11,7 @@ ManiaReplayMaster is a visualization tool for falling music games (Mania) replay
 
 Supported games: 
 - osu!mania
+- osu!taiko (beta test)
 - Malody key mode (Version 4.x)
 
 Online rendering website: http://keytoix.vip/mania/
@@ -40,7 +41,7 @@ http://keytoix.vip/mania/
 
 ### Method 2: local rendering
 
-First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.2.2/ManiaReplayMaster.v2.2.2.zip) to download the tool kit.
+First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3/ManiaReplayMaster.v2.3.zip) to download the tool kit.
 
 Second, please ensure that you have installed Java (at least version 8.0)
 
