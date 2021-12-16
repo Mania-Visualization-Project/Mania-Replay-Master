@@ -11,7 +11,7 @@ ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。�
 
 支持游戏：
 - osu!mania
-- Malody 4.x (key mode)
+- Malody key mode (4.x 版本)
 
 在线渲染网站：http://keytoix.vip/mania/
 

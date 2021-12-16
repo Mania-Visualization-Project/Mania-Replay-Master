@@ -47,18 +47,22 @@ object ReplayMaster {
         }
 
         // UI
-        val progressSize = 50
-        fun getNChar(count: Int, ch: String) = Collections.nCopies(max(count, 0), ch).joinToString("")
-        val solidCount = (progress / 100.0 * progressSize).toInt()
-        val voidCount = progressSize - solidCount
-        val progressText = String.format("%03.2f%%├", progress)
-        val totalCount = solidCount + voidCount + progressText.length + 1
+        if (Config.INSTANCE.isDesktop) {
+            println("progress: $progress")
+        } else {
+            val progressSize = 50
+            fun getNChar(count: Int, ch: String) = Collections.nCopies(max(count, 0), ch).joinToString("")
+            val solidCount = (progress / 100.0 * progressSize).toInt()
+            val voidCount = progressSize - solidCount
+            val progressText = String.format("%03.2f%%├", progress)
+            val totalCount = solidCount + voidCount + progressText.length + 1
 
-        print(getNChar(totalCount, "\b"))
-        print(progressText)
+            print(getNChar(totalCount, "\b"))
+            print(progressText)
 
-        print(getNChar(solidCount, "█"))
-        print(getNChar(voidCount, "-"))
-        print("┤")
+            print(getNChar(solidCount, "█"))
+            print(getNChar(voidCount, "-"))
+            print("┤")
+        }
     }
 }

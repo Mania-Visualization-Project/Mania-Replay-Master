@@ -15,6 +15,9 @@ import java.util.zip.ZipInputStream
 val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())!!
 
 fun logLine(key: String, vararg args: Any? = arrayOf()) {
+    if (Config.INSTANCE.isDesktop) {
+        return
+    }
     if (args.size == 0) {
         println(RESOURCE_BUNDLE.getString(key))
     } else {
@@ -25,6 +28,13 @@ fun logLine(key: String, vararg args: Any? = arrayOf()) {
 fun debug(content: String) {
     if (Config.INSTANCE.debug) {
         println("[DEBUG] $content")
+    }
+}
+
+fun warning(key: String, vararg args: Any? = arrayOf()) {
+    logLine(key, args)
+    if (Config.INSTANCE.isDesktop) {
+        println("warning: $key")
     }
 }
 

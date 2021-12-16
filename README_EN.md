@@ -9,9 +9,9 @@
 
 ManiaReplayMaster is a visualization tool for falling music games (Mania) replay. It can attach hit positions to the map, mark judgement of the note, and renderer an video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, help to learn the play skills, analyze the comprehensive strength of a player, and judge if a player cheated.
 
-Supported game: 
+Supported games: 
 - osu!mania
-- Malody 4.x (key mode)
+- Malody key mode (Version 4.x)
 
 Online rendering website: http://keytoix.vip/mania/
 

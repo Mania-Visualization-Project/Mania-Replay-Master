@@ -1,6 +1,6 @@
 package me.replaymaster.model
 
-import me.replaymaster.logLine
+import me.replaymaster.warning
 import java.io.File
 
 data class BeatMap(
@@ -28,7 +28,7 @@ data class BeatMap(
             val path = parent.listFiles()?.firstOrNull {
                 it.extension == bgmFile.extension || it.extension in MUSIC_EXTENSION
             }?.absolutePath ?: MUTE_MUSIC
-            logLine("warning.bgm_not_found", bgmPath, path)
+            warning("warning.bgm_not_found", bgmPath, path)
             bgmPath = path
         }
     }

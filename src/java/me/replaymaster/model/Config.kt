@@ -29,6 +29,7 @@ data class Config(
         var codec: String = "libx264",
         var outputDir: String = "out",
         var isServer: Boolean = false,
+        var isDesktop: Boolean = false,
         var maxStepSize: Int = 3000,
         var ffmpegMaxProcessingSize: Int = 20,
         var exportJudgementResults: Boolean = false
@@ -44,8 +45,6 @@ data class Config(
             } else {
                 yamlPath.writeText(defaultSetting)
             }
-            logLine("config.hint", yamlPath.absolutePath)
-            println()
         }
 
         fun refresh(yamlPath: File) {

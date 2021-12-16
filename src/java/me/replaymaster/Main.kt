@@ -15,6 +15,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.lang.IllegalArgumentException
 import java.util.*
+import kotlin.system.exitProcess
 
 object Main {
 
@@ -52,7 +53,7 @@ object Main {
             }
         }
         if (!checkMD5(beatMapFile, md5)) {
-            logLine("warning.md5", md5)
+            warning("warning.md5", md5)
         }
 
         logLine("read.beatmap", beatMapFile.path)
@@ -98,8 +99,11 @@ object Main {
             File("config.txt")
         }
 
-        printWelcome()
         Config.init(yamlPath)
+        printWelcome()
+
+        logLine("config.hint", yamlPath.absolutePath)
+        println()
 
         val scanner = Scanner(System.`in`)
         val beatMapFile = if (args.isNotEmpty()) {
@@ -121,7 +125,6 @@ object Main {
         Config.refresh(yamlPath)
         val startTime = System.currentTimeMillis()
 
-        // TODO: check update
         try {
             // workspace
             val tempDir = parent.resolve("temp_dir")
@@ -156,6 +159,9 @@ object Main {
             check(outFile.exists()) { "generated file failed!" }
 
             logLine("render.success", outFile.absolutePath)
+            if (Config.INSTANCE.isDesktop) {
+                println("out: ${outFile.absolutePath}")
+            }
 
             Monitor.reportTask(startTime, beatMapFile, replayFile, File(beatMap.bgmPath), "")
 
@@ -163,7 +169,7 @@ object Main {
                 tempDir.deleteRecursively()
             }
 
-            if (!Config.INSTANCE.isServer) {
+            if (!Config.INSTANCE.isServer && !Config.INSTANCE.isDesktop) {
                 scanner.nextLine()
                 Desktop.getDesktop().open(outFile)
             }
@@ -172,18 +178,26 @@ object Main {
 //                parent.resolve("error.txt").writeText(StringWriter().apply {
 //                    throwable.printStackTrace(PrintWriter(this))
 //                }.toString())
-                parent.resolve("error.txt").writeText(throwable.toString())
+                parent.resolve("error.txt").writeText(throwable.toString() + "\nerror code: " + parseExceptionCode(throwable))
             }
 
             Monitor.reportTask(startTime, beatMapFile, replayFile, null, StringWriter().apply {
-                    throwable.printStackTrace(PrintWriter(this))
+                throwable.printStackTrace(PrintWriter(this))
             }.toString())
+
+            if (Config.INSTANCE.isDesktop) {
+                println("error: ${parseExceptionCode(throwable)}")
+                exitProcess(1)
+            }
 
             throw throwable
         }
     }
 
     private fun printWelcome() {
+        if (Config.INSTANCE.isDesktop) {
+            return
+        }
         val reposite = RESOURCE_BUNDLE.getString("app.reposite")
         val appName = RESOURCE_BUNDLE.getString("app.name")
         val versionName = RESOURCE_BUNDLE.getString("app.version")
@@ -215,5 +229,28 @@ object Main {
 
     private fun checkMD5(beatMapFile: File, md5: String): Boolean {
         return getMD5(beatMapFile)?.toUpperCase() == md5
+    }
+
+    private fun parseExceptionCode(throwable: Throwable): String {
+        val msg = throwable.toString()
+        return when {
+            "enerated file fail" in msg -> {
+                "render_failed"
+            }
+
+            "Cannot find the beatmap with the given" in msg -> {
+                "beatmap_not_found"
+            }
+
+            "Invalid beatmap file" in msg || "Invalid .mc file" in msg -> {
+                "beatmap_invalid"
+            }
+
+            "Invalid replay file" in msg || "not a valid .mr file" in msg -> {
+                "replay_invalid"
+            }
+
+            else -> msg
+        }
     }
 }
