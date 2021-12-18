@@ -41,7 +41,7 @@ http://keytoix.vip/mania/
 
 ### Method 2: local rendering
 
-First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3/ManiaReplayMaster.v2.3.zip) to download the tool kit.
+First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3.1/ManiaReplayMaster.v2.3.1.zip) to download the tool kit.
 
 Second, please ensure that you have installed Java (at least version 8.0)
 

@@ -41,7 +41,7 @@ http://keytoix.vip/mania/
 
 ### 方法二、本地渲染
 
-首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3/ManiaReplayMaster.v2.3.zip)下载工具包。
+首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3.1/ManiaReplayMaster.v2.3.1.zip)下载工具包。
 
 其次，确保已经成功安装 Java 8.0 以上版本。
 

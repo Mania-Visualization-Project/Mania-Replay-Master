@@ -104,6 +104,7 @@ object Main {
 
         Config.init(yamlPath)
         printWelcome()
+        UpdateHelper.checkUpdate()
 
         logLine("config.hint", yamlPath.absolutePath)
         println()
@@ -126,6 +127,7 @@ object Main {
         debug("beatmap: $beatMapFile, replay: $replayFile")
         val parent = File(Config.INSTANCE.outputDir)
         Config.refresh(yamlPath)
+
         val startTime = System.currentTimeMillis()
 
         try {
@@ -141,6 +143,8 @@ object Main {
 
             // judgement
             val (beatMap, replayModel, delay) = prepareJudgements(beatMapFile, replayFile, parent, tempDir)
+
+            UpdateHelper.notifyLatestVersionIfNecessary()
 
             // render
             logLine("render", Config.INSTANCE.speed)
