@@ -63,7 +63,7 @@ abstract class BaseJudger(
                     if (candidate == null) {
                         candidate = note
                         if (canHit != HIT_AND_CAN_HIT_AGAIN) {
-                            cannotJudge.add(note)
+                            listNode.remove()
                         }
                         break
                     }

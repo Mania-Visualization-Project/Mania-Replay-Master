@@ -21,7 +21,7 @@ class OsuTaikoJudger(
 
     override fun canHit(action: Note, note: Note): Int {
         val diff = action.timeStamp - note.timeStamp
-        if (isWrongAction(action, note)) {
+        if (isWrongAction(action, note) && (note.duelNote == null || note.duelNote!! !in firstHitNoteToAction)) {
             return if (abs(diff) <= judgementWindow[J_MISS]) {
                 wrongHitNoteToAction[note] = action
                 HIT_AND_CAN_HIT_AGAIN
@@ -81,10 +81,8 @@ class OsuTaikoJudger(
         super.onFindTarget(action, target)
         if (target.column + action.column == 3) {
             target.column = action.column
-        } else if (target.column != action.column) {
-            return
+            target.duelNote?.column = 3 - action.column
         }
-        target.duelNote?.column = 3 - action.column
     }
 
     override fun getJudgement(diff: Double, note: Note?, action: Note?): Int {

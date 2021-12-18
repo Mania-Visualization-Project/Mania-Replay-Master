@@ -85,6 +85,13 @@ class Render(
         rectangle(x.toInt() to y.toInt(),
                 (x + width).toInt() to (y - h).toInt(),
                 color, if (isBase) Config.INSTANCE.stroke else -1)
+
+        if (isBase && Config.INSTANCE.debug) {
+            graphics2D.run {
+                paint = color
+                drawString(note.timeStamp.toString(), (x + Config.INSTANCE.stroke).toInt(), (y - Config.INSTANCE.stroke).toInt())
+            }
+        }
     }
 
     private fun renderActionLN(note: Note, currentTime: Double) {
@@ -126,7 +133,7 @@ class Render(
         }
         for (note in data) {
             renderNote(note, time - note.timeStamp, isBase, note.judgementStart)
-            if (!isBase && note.showAsLN) { // hold LN, render end
+            if (!isBase && (note.showAsLN || Config.INSTANCE.showHolding)) { // hold LN, render end
                 renderNote(note, time - note.endTime, false,
                         note.judgementEnd)
                 renderActionLN(note, time)

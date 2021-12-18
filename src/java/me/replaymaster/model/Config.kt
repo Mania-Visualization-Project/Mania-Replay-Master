@@ -31,6 +31,7 @@ data class Config(
         var isServer: Boolean = false,
         var isDesktop: Boolean = false,
         var maxStepSize: Int = 3000,
+        var showHolding: Boolean = false,
         var ffmpegMaxProcessingSize: Int = 20,
         var exportJudgementResults: Boolean = false
 ) {
