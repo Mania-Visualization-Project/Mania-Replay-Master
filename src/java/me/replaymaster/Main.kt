@@ -79,6 +79,9 @@ object Main {
             }
             throw InvalidReplayException(replayFile.absolutePath, t)
         }
+        val delay = 1000L
+        beatMap.notes.forEach { it.timeStamp += delay }
+        replayModel.replayData.forEach { it.timeStamp += delay }
         beatMap.duration = maxOf(replayModel.replayData.last().endTime, beatMap.notes.last().endTime) + 2000L
 
         logLine("judgement.generate")
@@ -90,10 +93,6 @@ object Main {
             logLine("judgement.export", exportFile.absolutePath)
             exportFile.writeText(Gson().toJson(replayModel.replayData))
         }
-
-        val delay = 1000L
-        beatMap.notes.forEach { it.timeStamp += delay }
-        replayModel.replayData.forEach { it.timeStamp += delay }
 
         return Triple(beatMap, replayModel, delay)
     }

@@ -21,7 +21,11 @@ class OsuTaikoJudger(
 
     override fun canHit(action: Note, note: Note): Int {
         val diff = action.timeStamp - note.timeStamp
-        if (isWrongAction(action, note) && (note.duelNote == null || note.duelNote!! !in firstHitNoteToAction)) {
+        if (isWrongAction(action, note)) {
+            if (note.duelNote != null && note.duelNote!! in firstHitNoteToAction) {
+                // second hit: ignore wrong action
+                return IGNORE
+            }
             return if (abs(diff) <= judgementWindow[J_MISS]) {
                 wrongHitNoteToAction[note] = action
                 HIT_AND_CAN_HIT_AGAIN
