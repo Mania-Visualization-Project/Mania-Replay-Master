@@ -1,6 +1,7 @@
 package me.replaymaster.beatmap
 
 import com.google.gson.Gson
+import me.replaymaster.InvalidBeatmapException
 import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
@@ -18,7 +19,7 @@ object MalodyMapReader : IMapReader {
 
         // meta info
         val metaNote = malodyMapModel.note.last { it.sound != null }
-        val bgmName = checkNotNull(metaNote.sound) { "Invalid .mc file: sound not found!" }
+        val bgmName = metaNote.sound ?: throw InvalidBeatmapException(path, Exception("Invalid .mc file: sound not found!"))
         val offset = metaNote.offset ?: 0.0
         val key = malodyMapModel.meta.modeExt.column
 

@@ -20,6 +20,7 @@ data class BeatMap(
 
         const val TYPE_MANIA = 0
         const val TYPE_TAIKO = 1
+        const val TYPE_OSU_STD = 2 // currently not supported
     }
 
     fun checkValidation() {

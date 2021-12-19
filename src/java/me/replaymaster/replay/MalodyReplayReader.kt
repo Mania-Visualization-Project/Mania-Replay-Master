@@ -1,10 +1,7 @@
 package me.replaymaster.replay
 
-import me.replaymaster.Main
-import me.replaymaster.adjust
-import me.replaymaster.debug
+import me.replaymaster.*
 import me.replaymaster.judger.MalodyJudger
-import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Config
 import me.replaymaster.model.Note
@@ -29,7 +26,7 @@ object MalodyReplayReader : IReplayReader {
 
     override fun readBeatMapMD5(replayPath: String): String {
         OsuBinaryInputStream(FileInputStream(replayPath)).use {
-            check(it.readMalodyString() == "mr format head") { "not a valid .mr file!" }
+            checkFormatValid(replayPath, it.readMalodyString() == "mr format head")
             readByteAsHexString(it, 4) // version
             return it.readMalodyString()
         }
@@ -45,7 +42,7 @@ object MalodyReplayReader : IReplayReader {
 
     override fun readReplay(path: String, beatMap: BeatMap): ReplayModel {
         OsuBinaryInputStream(FileInputStream(path)).use {
-            check(it.readMalodyString() == "mr format head") { "not a valid .mr file!" }
+            checkFormatValid(path, it.readMalodyString() == "mr format head")
             val version = readByteAsHexString(it, 4)
             val md5 = it.readMalodyString()
             val difficulty = it.readMalodyString()
@@ -75,7 +72,7 @@ object MalodyReplayReader : IReplayReader {
             val judgement = getJudgement(judge)
             logLine("read.beatmap.judgement", Arrays.toString(judgement))
 
-            check(it.readMalodyString() == "mr data") { "not a valid .mr file!" }
+            checkFormatValid(path, it.readMalodyString() == "mr data")
             readByteAsHexString(it, 4) // version
 
             val eventCount = it.int32
@@ -95,8 +92,8 @@ object MalodyReplayReader : IReplayReader {
                 if (timeStamp < 0) {
                     continue
                 }
-                check(pressOrRelease == 2 || pressOrRelease == 1) { "not a valid .mr file!" }
-                check(column < beatMap.key) { "not a valid .mr file!" }
+                checkFormatValid(path, pressOrRelease == 2 || pressOrRelease == 1)
+                checkFormatValid(path, column < beatMap.key)
                 if (pressOrRelease == 1) {
                     // press
                     if (currentHold.containsKey(column)) {
@@ -130,6 +127,12 @@ object MalodyReplayReader : IReplayReader {
         }
                 .joinToString()
 
+    }
+
+    private fun checkFormatValid(path: String, valid: Boolean) {
+        if (!valid) {
+            throw InvalidReplayException(path, Exception())
+        }
     }
 }
 

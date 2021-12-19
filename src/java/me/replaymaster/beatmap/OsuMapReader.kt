@@ -1,9 +1,11 @@
 package me.replaymaster.beatmap
 
+import me.replaymaster.ModeNotSupportedException
 import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import kotlin.math.floor
 
@@ -12,9 +14,9 @@ object OsuMapReader : IMapReader {
     override val mapExtension: String = "osu"
     override val zipExtension: String = "osz"
 
-    const val STATUS_UNKNOWN = 0
-    const val STATUS_TIME = 1
-    const val STATUS_OBJECTS = 2
+    private const val STATUS_UNKNOWN = 0
+    private const val STATUS_TIME = 1
+    private const val STATUS_OBJECTS = 2
 
     private fun parseAttributes(key: String, value: String, beatMap: BeatMap, beatMapFile: File) {
         when (key) {
@@ -29,15 +31,23 @@ object OsuMapReader : IMapReader {
             }
 
             "Mode" -> {
-                if (value == "1") {
-                    beatMap.type = BeatMap.TYPE_TAIKO
-                    beatMap.gameMode = "osu!taiko"
-                    beatMap.key = 4
-                } else if (value == "3") {
-                    beatMap.type = BeatMap.TYPE_MANIA
-                    beatMap.gameMode = "osu!mania"
-                } else {
-                    throw IllegalArgumentException("Not support this kind of map!")
+                when (value) {
+                    "0" -> {
+                        beatMap.type = BeatMap.TYPE_OSU_STD
+                        beatMap.gameMode = "osu!std"
+                    }
+                    "1" -> {
+                        beatMap.type = BeatMap.TYPE_TAIKO
+                        beatMap.gameMode = "osu!taiko"
+                        beatMap.key = 4
+                    }
+                    "3" -> {
+                        beatMap.type = BeatMap.TYPE_MANIA
+                        beatMap.gameMode = "osu!mania"
+                    }
+                    else -> {
+                        throw ModeNotSupportedException(value)
+                    }
                 }
                 logLine("read.beatmap.mode", beatMap.gameMode)
             }
@@ -104,30 +114,35 @@ object OsuMapReader : IMapReader {
         var status = STATUS_UNKNOWN
         inputStream.bufferedReader().lines().forEach {
             val line = it.trim()
-            if (line == "[TimingPoints]") {
-                status = STATUS_TIME
-            } else if (line == "[HitObjects]") {
-                status = STATUS_OBJECTS
-                logLine("read.beatmap.notes")
-            } else if (line.startsWith("[")) {
-                status = STATUS_UNKNOWN
-            } else {
-                when (status) {
-                    STATUS_UNKNOWN -> {
-                        if (line.contains(":")) {
-                            val lines = line.split(":", limit = 2)
-                            parseAttributes(lines[0].trim(), lines[1].trim(), beatMap, inputFile)
+            when {
+                line == "[TimingPoints]" -> {
+                    status = STATUS_TIME
+                }
+                line == "[HitObjects]" -> {
+                    status = STATUS_OBJECTS
+                    logLine("read.beatmap.notes")
+                }
+                line.startsWith("[") -> {
+                    status = STATUS_UNKNOWN
+                }
+                else -> {
+                    when (status) {
+                        STATUS_UNKNOWN -> {
+                            if (line.contains(":")) {
+                                val lines = line.split(":", limit = 2)
+                                parseAttributes(lines[0].trim(), lines[1].trim(), beatMap, inputFile)
+                            }
                         }
+
+                        STATUS_TIME -> {
+
+                        }
+
+                        STATUS_OBJECTS -> {
+                            parseHitObjects(line, notes, beatMap)
+                        }
+
                     }
-
-                    STATUS_TIME -> {
-
-                    }
-
-                    STATUS_OBJECTS -> {
-                        parseHitObjects(line, notes, beatMap)
-                    }
-
                 }
             }
         }

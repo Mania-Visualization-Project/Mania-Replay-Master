@@ -190,6 +190,8 @@ class Encoder(
         }
         debug("Render duration: ${(System.currentTimeMillis() - startTime) / 1000} s")
 
-        check(out.exists()) { "FFMPEG generated file failed!: ${out.absolutePath}" }
+        if (!out.exists()) {
+            throw VideoGenerationException(Exception(out.absolutePath))
+        }
     }
 }

@@ -7,13 +7,10 @@ import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Config
 import me.replaymaster.model.ReplayModel
 import me.replaymaster.replay.IReplayReader
-import org.apache.commons.compress.compressors.CompressorException
 import java.awt.Desktop
 import java.io.File
-import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -24,19 +21,22 @@ object Main {
 
     private fun prepareJudgements(beatMapFileParam: File, replayFile: File, parent: File, tempDir: File): Triple<BeatMap, ReplayModel, Long> {
         var beatMapFile = beatMapFileParam
-        val replayReader = checkNotNull(IReplayReader.matchReplayReader(replayFile)) {
-            "Invalid replay file: ${replayFile.absolutePath}"
-        }
+        val replayReader = IReplayReader.matchReplayReader(replayFile)
+                ?: throw InvalidReplayException(replayFile.absolutePath, Exception())
         val md5 = try {
             replayReader.readBeatMapMD5(replayFile.absolutePath).toUpperCase()
         } catch (t: Throwable) {
-            throw IllegalArgumentException("Invalid replay file: ${replayFile.absolutePath}", t)
+            throw InvalidReplayException(replayFile.absolutePath, t)
         }
         if (!beatMapFile.isDirectory && IMapReader.isZipMap(beatMapFile)) {
             val unzipPath = tempDir.resolve("temp_map")
             unzipPath.mkdir()
             logLine("read.beatmap.iscompressed", unzipPath.absolutePath)
-            unzip(beatMapFile.absolutePath, unzipPath.absolutePath)
+            try {
+                unzip(beatMapFile.absolutePath, unzipPath.absolutePath)
+            } catch (t: Throwable) {
+                throw InvalidBeatmapException(beatMapFile.absolutePath, t)
+            }
             beatMapFile = unzipPath
         }
         if (beatMapFile.isDirectory) {
@@ -47,9 +47,9 @@ object Main {
             beatMapFile = if (candidates.size == 1) {
                 candidates[0]
             } else {
-                checkNotNull(candidates.firstOrNull {
+                candidates.firstOrNull {
                     checkMD5(it, md5)
-                }) { "Cannot find the beatmap with the given replay file with MD5: $md5" }
+                } ?: throw BeatmapNotFoundException(md5)
             }
         }
         if (!checkMD5(beatMapFile, md5)) {
@@ -60,7 +60,10 @@ object Main {
         val beatMap = try {
             IMapReader.matchMapReader(beatMapFile)!!.readMap(beatMapFile.absolutePath)
         } catch (t: Throwable) {
-            throw IllegalArgumentException("Invalid beatmap file: ${beatMapFile.absolutePath}", t)
+            if (t is BaseException) {
+                throw t
+            }
+            throw InvalidBeatmapException(beatMapFile.absolutePath, t)
         }
         beatMap.checkValidation()
         if (Config.INSTANCE.isServer) {
@@ -71,7 +74,10 @@ object Main {
         val replayModel = try {
             replayReader.readReplay(replayFile.absolutePath, beatMap)
         } catch (t: Throwable) {
-            throw IllegalArgumentException("Invalid replay file: ${replayFile.absolutePath}", t)
+            if (t is BaseException) {
+                throw t
+            }
+            throw InvalidReplayException(replayFile.absolutePath, t)
         }
         beatMap.duration = maxOf(replayModel.replayData.last().endTime, beatMap.notes.last().endTime) + 2000L
 
@@ -92,7 +98,6 @@ object Main {
         return Triple(beatMap, replayModel, delay)
     }
 
-    @Throws(IOException::class, CompressorException::class)
     @JvmStatic
     fun main(args: Array<String>) {
 
@@ -153,16 +158,18 @@ object Main {
             if (outFile.exists()) {
                 outFile.delete()
             }
-            val windowFrameCount = Render(beatMap, replayModel, tempFile).start()
 
             try {
+                val windowFrameCount = Render(beatMap, replayModel, tempFile).start()
                 ReplayMaster.generateVideo(beatMap, tempFile, outFile, replayModel.rate, delay.toInt(), windowFrameCount)
             } catch (ex: Exception) {
-                ex.printStackTrace()
+                throw VideoGenerationException(ex)
             }
 
             // finish
-            check(outFile.exists()) { "generated file failed!" }
+            if (!outFile.exists()) {
+                throw VideoGenerationException(Exception())
+            }
 
             logLine("render.success", outFile.absolutePath)
             if (Config.INSTANCE.isDesktop) {
@@ -196,7 +203,8 @@ object Main {
                 exitProcess(1)
             }
 
-            throw throwable
+            println("\nError: ${throwable.message}")
+            exitProcess(1)
         }
     }
 
@@ -238,25 +246,10 @@ object Main {
     }
 
     private fun parseExceptionCode(throwable: Throwable): String {
-        val msg = throwable.toString()
-        return when {
-            "enerated file fail" in msg -> {
-                "render_failed"
-            }
-
-            "Cannot find the beatmap with the given" in msg -> {
-                "beatmap_not_found"
-            }
-
-            "Invalid beatmap file" in msg || "Invalid .mc file" in msg -> {
-                "beatmap_invalid"
-            }
-
-            "Invalid replay file" in msg || "not a valid .mr file" in msg -> {
-                "replay_invalid"
-            }
-
-            else -> msg
+        return if (throwable is BaseException) {
+            throwable.errorCode
+        } else {
+            throwable.toString()
         }
     }
 }

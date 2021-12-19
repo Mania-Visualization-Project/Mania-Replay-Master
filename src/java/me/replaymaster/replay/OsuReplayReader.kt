@@ -1,13 +1,12 @@
 package me.replaymaster.replay
 
-import me.replaymaster.adjust
-import me.replaymaster.debug
+import me.replaymaster.*
 import me.replaymaster.judger.OsuManiaJudger
 import me.replaymaster.judger.OsuTaikoJudger
-import me.replaymaster.logLine
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Note
 import me.replaymaster.model.ReplayModel
+import me.replays.Mode
 import me.replays.Mods
 import me.replays.ReplayData
 import me.replays.parse.ReplayReader
@@ -72,6 +71,15 @@ object OsuReplayReader : IReplayReader {
         debug("Judgement results in replay: ${replayData.replay.beat300}, ${replayData.replay.hit300}, " +
                 "${replayData.replay.beat100}, ${replayData.replay.hit100}, ${replayData.replay.hit50}, " +
                 "${replayData.replay.misses}")
+        if (replayData.replay.mode == Mode.Osu && beatMap.type != BeatMap.TYPE_OSU_STD
+                || replayData.replay.mode == Mode.Taiko && beatMap.type != BeatMap.TYPE_TAIKO
+                || replayData.replay.mode == Mode.OsuMania && beatMap.type != BeatMap.TYPE_MANIA) {
+            throw ReplayModeNotMatchedException(replayData.replay.mode.toString(), beatMap.gameMode)
+        }
+        if (replayData.replay.mode != Mode.OsuMania && replayData.replay.mode != Mode.Taiko) {
+            throw ModeNotSupportedException(replayData.replay.mode.toString())
+        }
+
         replayData.parse()
 
         var current: Long = 0
