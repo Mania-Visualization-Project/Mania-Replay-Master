@@ -191,6 +191,7 @@ object Main {
 //                    throwable.printStackTrace(PrintWriter(this))
 //                }.toString())
                 parent.resolve("error.txt").writeText(throwable.toString() + "\nerror code: " + parseExceptionCode(throwable))
+                throw throwable
             }
 
             Monitor.reportTask(startTime, beatMapFile, replayFile, null, StringWriter().apply {

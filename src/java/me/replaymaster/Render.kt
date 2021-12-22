@@ -86,7 +86,7 @@ class Render(
                 (x + width).toInt() to (y - h).toInt(),
                 color, if (isBase) Config.INSTANCE.stroke else -1)
 
-        if (isBase && Config.INSTANCE.debug) {
+        if (isBase && Config.INSTANCE.showTimestamp) {
             graphics2D.run {
                 paint = color
                 drawString(note.timeStamp.toString(), (x + Config.INSTANCE.stroke).toInt(), (y - Config.INSTANCE.stroke).toInt())
