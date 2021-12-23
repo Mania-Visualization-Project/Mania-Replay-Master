@@ -3,14 +3,11 @@ package me.replaymaster
 import me.replaymaster.model.BeatMap
 import me.replaymaster.model.Config
 import me.replaymaster.model.ReplayModel
-import java.io.BufferedOutputStream
+import net.lingala.zip4j.ZipFile
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
-import java.util.zip.ZipInputStream
 
 val RESOURCE_BUNDLE = ResourceBundle.getBundle("res/language", Utf8Control())!!
 
@@ -80,37 +77,38 @@ fun getMD5(file: File): String? {
 }
 
 fun unzip(zipFilePath: String, desDirectory: String) {
-    val desDir = File(desDirectory)
-    if (!desDir.exists()) {
-        check(desDir.mkdir())
-    }
-    val zipInputStream = ZipInputStream(FileInputStream(zipFilePath))
-    var zipEntry = zipInputStream.nextEntry
-    while (zipEntry != null) {
-        val unzipFilePath = desDirectory + File.separator + zipEntry.name
-        if (zipEntry.isDirectory) {
-            mkdir(File(unzipFilePath))
-        } else {
-            val file = File(unzipFilePath)
-            mkdir(file.parentFile)
-            val bufferedOutputStream = BufferedOutputStream(FileOutputStream(unzipFilePath))
-            val bytes = ByteArray(1024)
-            var readLen: Int
-            while (zipInputStream.read(bytes).also { readLen = it } > 0) {
-                bufferedOutputStream.write(bytes, 0, readLen)
-            }
-            bufferedOutputStream.close()
-        }
-        zipInputStream.closeEntry()
-        zipEntry = zipInputStream.nextEntry
-    }
+    ZipFile(zipFilePath).extractAll(desDirectory)
+//    val desDir = File(desDirectory)
+//    if (!desDir.exists()) {
+//        check(desDir.mkdir())
+//    }
+//    val zipInputStream = ZipInputStream(FileInputStream(zipFilePath))
+//    var zipEntry = zipInputStream.nextEntry
+//    while (zipEntry != null) {
+//        val unzipFilePath = desDirectory + File.separator + zipEntry.name
+//        if (zipEntry.isDirectory) {
+//            mkdir(File(unzipFilePath))
+//        } else {
+//            val file = File(unzipFilePath)
+//            mkdir(file.parentFile)
+//            val bufferedOutputStream = BufferedOutputStream(FileOutputStream(unzipFilePath))
+//            val bytes = ByteArray(1024)
+//            var readLen: Int
+//            while (zipInputStream.read(bytes).also { readLen = it } > 0) {
+//                bufferedOutputStream.write(bytes, 0, readLen)
+//            }
+//            bufferedOutputStream.close()
+//        }
+//        zipInputStream.closeEntry()
+//        zipEntry = zipInputStream.nextEntry
+//    }
 }
 
-private fun mkdir(file: File) {
-    if (file.exists()) {
-        return
-    } else {
-        file.parentFile.mkdir()
-        file.mkdir()
-    }
-}
+//private fun mkdir(file: File) {
+//    if (file.exists()) {
+//        return
+//    } else {
+//        file.parentFile.mkdir()
+//        file.mkdir()
+//    }
+//}

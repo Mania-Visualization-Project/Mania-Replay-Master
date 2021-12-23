@@ -43,3 +43,7 @@ class InvalidReplayException(replayPath: String, rootCause: Throwable) : IOExcep
 ), BaseException {
     override val errorCode: String = "replay_invalid"
 }
+
+class DurationTooLongException: IOException("Duration of the beatmap is too long!"), BaseException {
+    override val errorCode: String = "duration_too_long"
+}

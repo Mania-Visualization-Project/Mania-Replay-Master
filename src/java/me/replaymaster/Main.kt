@@ -84,6 +84,10 @@ object Main {
         replayModel.replayData.forEach { it.timeStamp += delay }
         beatMap.duration = maxOf(replayModel.replayData.last().endTime, beatMap.notes.last().endTime) + 2000L
 
+        if (Config.INSTANCE.maxEnabledDuration > 0 && beatMap.duration > Config.INSTANCE.maxEnabledDuration) {
+            throw DurationTooLongException()
+        }
+
         logLine("judgement.generate")
         val judger = replayReader.getJudger(beatMap, replayModel)
         judger.judge()
@@ -204,7 +208,12 @@ object Main {
             }
 
             println("\nError: ${throwable.message}")
-            exitProcess(1)
+
+            if (Config.INSTANCE.debug) {
+                throw throwable
+            } else {
+                exitProcess(1)
+            }
         }
     }
 

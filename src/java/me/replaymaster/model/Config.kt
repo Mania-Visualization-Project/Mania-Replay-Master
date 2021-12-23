@@ -34,6 +34,7 @@ data class Config(
         var showHolding: Boolean = false,
         var showTimestamp: Boolean = false,
         var ffmpegMaxProcessingSize: Int = 20,
+        var maxEnabledDuration: Long = -1,
         var exportJudgementResults: Boolean = false
 ) {
 
