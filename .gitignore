@@ -9,3 +9,8 @@ src/cpp/.idea
 *.dll
 workspace.xml
 uiDesigner.xml
+*.exe
+
+*.spec
+build/
+dist/

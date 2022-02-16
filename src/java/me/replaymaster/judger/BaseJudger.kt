@@ -89,6 +89,8 @@ abstract class BaseJudger(
             val judgement = getJudgement(abs(action.timeStamp - target.timeStamp).toDouble(), target, action)
             action.judgementStart = judgement
             target.judgementStart = judgement
+            action.relatedActionOrNote = target
+            target.relatedActionOrNote = action
             if (target.duration == 0L) {
                 action.showAsLN = false
             } else {

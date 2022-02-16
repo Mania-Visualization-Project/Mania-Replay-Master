@@ -95,7 +95,7 @@ object Main {
         if (Config.INSTANCE.exportJudgementResults) {
             val exportFile = parent.resolve("judgement_${replayFile.nameWithoutExtension}.json")
             logLine("judgement.export", exportFile.absolutePath)
-            exportFile.writeText(Gson().toJson(replayModel.replayData))
+            exportFile.writeText(Gson().toJson(replayModel.replayData.map { it.toSingleNote() }))
         }
 
         return Triple(beatMap, replayModel, delay)
@@ -163,8 +163,9 @@ object Main {
             }
 
             try {
-                val windowFrameCount = Render(beatMap, replayModel, tempFile).start()
-                ReplayMaster.generateVideo(beatMap, tempFile, outFile, replayModel.rate, delay.toInt(), windowFrameCount)
+                val (windowFrameCount, gameWidth) = Render(beatMap, replayModel, tempFile).start()
+                ReplayMaster.generateVideo(beatMap, tempFile, outFile, replayModel.rate, delay.toInt(),
+                        windowFrameCount, gameWidth)
             } catch (ex: Exception) {
                 throw VideoGenerationException(ex)
             }

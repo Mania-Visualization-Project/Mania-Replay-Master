@@ -18,14 +18,14 @@ object ReplayMaster {
 
     @JvmStatic
     fun generateVideo(beatMap: BeatMap, videoFile: File, outFile: File, rate: Double, delay: Int,
-                      windowFrameCount: Int) {
+                      windowFrameCount: Int, gameWidth: Int) {
         var ffmpegPath = File("ffmpeg.exe").absolutePath
         debug("FFMPEG path1: ${ffmpegPath}")
         if (!File(ffmpegPath).exists()) {
             ffmpegPath = "ffmpeg"
         }
         debug("FFMPEG path2: ${ffmpegPath}")
-        Encoder(beatMap, videoFile, outFile, rate, delay, windowFrameCount, ffmpegPath).generateVideo()
+        Encoder(beatMap, videoFile, outFile, rate, delay, windowFrameCount, ffmpegPath, gameWidth).generateVideo()
     }
 
     private val startTimes = hashMapOf<String, Long>()

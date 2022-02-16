@@ -1,7 +1,6 @@
 package me.replaymaster.model
 
 import me.replaymaster.debug
-import me.replaymaster.logLine
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 
@@ -23,6 +22,9 @@ data class Config(
         ),
         var taikoBackgroundRed: String = "30ED402F",
         var taikoBackgroundBlue: String = "30488FAD",
+        var taikoSingleColumn: Boolean = false,
+        var taikoForegroundRed: String = "88ED402F",
+        var taikoForegroundBlue: String = "88488FAD",
         var missColor: String = "FF0000",
         var longNoteColor: String = "646464",
         var debug: Boolean = false,
@@ -65,6 +67,9 @@ data class Config(
             
             # Only valid when using Malody. true: PE, false: PC
             malodyPE: true
+            
+            # Only valid when using taiko. true: single column, false: multi column
+            taikoSingleColumn: false
             
             # UI settings
             width: 540

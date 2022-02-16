@@ -1,6 +1,7 @@
 package me.replaymaster.judger
 
 import me.replaymaster.model.BeatMap
+import me.replaymaster.model.Config
 import me.replaymaster.model.Note
 import me.replaymaster.model.ReplayModel
 import kotlin.math.abs
@@ -113,5 +114,62 @@ class OsuTaikoJudger(
 
     private fun isWrongAction(action: Note, note: Note): Boolean {
         return note.column != action.column && note.column + action.column != 3
+    }
+
+    override fun judge() {
+        super.judge()
+
+        if (Config.INSTANCE.taikoSingleColumn) {
+            // taiko: single column
+            beatMap.notes = beatMap.notes.filter {
+                it.duelNote == null || it.column <= 1
+            }
+                    .map { note ->
+                        note.column = 0
+                        if (note.duelNote != null && note.judgementStart == -1) {
+                            note.judgementStart = note.duelNote!!.judgementStart
+                        }
+                        note
+                    }
+            replayModel.replayData = replayModel.replayData.filter {
+                val relatedNote = it.relatedActionOrNote ?: return@filter true
+                relatedNote.judgementStart != -1
+            }
+                    .map { note ->
+                        note.column = 0
+                        note
+                    }
+        }
+
+
+//        val realNotes = beatMap.notes
+//        val combineNotes = arrayListOf<Note>()
+//        realNotes.forEach { note ->
+//            note.column += 1
+//            if (note.duelNote != null && note.column <= 2) {
+//                return@forEach
+//            }
+//            val judgement = if (note.duelNote != null && note.judgementStart == -1) {
+//                note.duelNote!!.judgementStart
+//            } else {
+//                note.judgementStart
+//            }
+//            combineNotes.add(
+//                    Note(note.timeStamp, judgementStart = judgement).apply {
+//                        taikoInitialColumn = note.column - 1
+//                    }
+//            )
+//        }
+//        beatMap.notes = (realNotes + combineNotes).sorted()
+//        beatMap.key += 1
+//
+//        replayModel.replayData.forEach {
+//            it.column += 1
+//        }
+//        replayModel.replayData = (replayModel.replayData + replayModel.replayData.map { note ->
+//            Note(timeStamp = note.timeStamp, judgementStart = note.judgementStart).apply {
+//                showAsLN = note.showAsLN
+//            }
+//        }).sorted()
     }
 }

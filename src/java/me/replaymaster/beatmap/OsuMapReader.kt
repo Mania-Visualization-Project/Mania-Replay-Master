@@ -85,13 +85,14 @@ object OsuMapReader : IMapReader {
                     val hitSound = elements[4].toInt()
                     val isRim = (hitSound and 2 != 0) || (hitSound and 8 != 0)
                     val note = if (isRim) { // rim
-                        Note(timeStamp, 0)
+                        Note(timeStamp, 0, taikoIsRed = !isRim)
                     } else {
-                        Note(timeStamp, 1)
+                        Note(timeStamp, 1, taikoIsRed = !isRim)
                     }
                     notes.add(note)
                     if ((hitSound and 4) != 0) { // Big note
-                        val duelNote = Note(timeStamp, 3 - note.column, duelNote = note)
+                        val duelNote = Note(timeStamp, 3 - note.column, duelNote = note,
+                                taikoIsRed = note.taikoIsRed)
                         note.duelNote = duelNote
                         notes.add(duelNote)
                     }

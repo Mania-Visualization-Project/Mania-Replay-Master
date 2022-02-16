@@ -8,13 +8,16 @@ class Note(
         var offSetEnd: Int = 0, // action, for monitor
         var judgementStart: Int = -1, // miss
         var judgementEnd: Int = -1, // LN judgement
-        var duelNote: Note? = null // taiko big note, seperated into two duel notes
+        var duelNote: Note? = null, // taiko big note, seperated into two duel notes
+        var taikoIsRed: Boolean = true // taiko
 ) : Comparable<Note> {
 
     val endTime: Long
         get() = duration + timeStamp
 
     var showAsLN = true
+
+    var relatedActionOrNote: Note? = null
 
     override fun compareTo(other: Note): Int {
         return timeStamp.compareTo(other.timeStamp)
@@ -29,11 +32,17 @@ class Note(
         timeStamp = (timeStamp / rate).toLong()
     }
 
-    fun setJudgement(judgement: Int, start: Boolean) {
-        if (start) {
-            judgementStart = judgement
-        } else {
-            judgementEnd = judgement
-        }
-    }
+    fun toSingleNote() = SingleNote(
+            timeStamp, column, duration, offSetStart, offSetEnd, judgementStart, judgementEnd
+    )
+
+    class SingleNote(
+            val timeStamp: Long = 0,
+            val column: Int = 0,
+            val duration: Long = 0,
+            val offSetStart: Int = 0, // action, for monitor
+            val offSetEnd: Int = 0, // action, for monitor
+            val judgementStart: Int = -1, // miss
+            val judgementEnd: Int = -1, // LN judgement
+    )
 }

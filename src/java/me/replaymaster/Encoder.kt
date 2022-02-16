@@ -16,7 +16,8 @@ class Encoder(
         private val rate: Double,
         private val delay: Int,
         private val windowFrameCount: Int,
-        private val ffmpegPath: String = "ffmpeg"
+        private val ffmpegPath: String,
+        private val gameWidth: Int
 ) {
 
     private val duration = beatMap.duration / 1000.0
@@ -109,7 +110,7 @@ class Encoder(
                 ""
             }
             filterGraph.addAll(listOf(
-                    "color=s=${Config.INSTANCE.width}*${Config.INSTANCE.height},fps=${Config.INSTANCE.framePerSecond}[bg$i]",
+                    "color=s=$gameWidth*${Config.INSTANCE.height},fps=${Config.INSTANCE.framePerSecond}[bg$i]",
                     "[bg$i][$inputFileIndex]overlay=y=-h+H+t*${Config.INSTANCE.framePerSecond * Config.INSTANCE.speed}:shortest=1[video${i}l]",
                     "[video${i}l]trim=end=$sliceDuration$transpose[video${i}]"
             ))
