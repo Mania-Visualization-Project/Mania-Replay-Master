@@ -104,7 +104,7 @@ class Render(
         drawRound(x to y, Config.INSTANCE.stroke, judgementToColor(note.judgementStart), Config.INSTANCE.stroke)
     }
 
-    private fun renderNote(note: Note, time: Double, isBase: Boolean, judgement: Int) {
+    private fun renderNote(note: Note, time: Double, isBase: Boolean, judgement: Int, debugText: String? = null) {
         if (isBase && beatMap.isTaiko) {
             renderTaikoNote(note, time)
             return
@@ -138,10 +138,10 @@ class Render(
                 (x + width).toInt() to (y - h).toInt(),
                 color, stroke, filledColor)
 
-        if (isBase && Config.INSTANCE.showTimestamp) {
+        if (debugText != null) {
             graphics2D.run {
                 paint = color
-                drawString(note.timeStamp.toString(), (x + Config.INSTANCE.stroke).toInt(), (y - Config.INSTANCE.stroke).toInt())
+                drawString(debugText, (x + Config.INSTANCE.stroke).toInt(), (y - Config.INSTANCE.stroke).toInt())
             }
         }
     }
@@ -209,8 +209,13 @@ class Render(
             }
         }
 
-        for (note in data) {
-            renderNote(note, time - note.timeStamp, isBase, note.judgementStart)
+        for (i in data.indices) {
+            val note = data[i]
+            var debugText: String? = null
+            if (isBase && Config.INSTANCE.showTimestamp) {
+                debugText = note.timeStamp.toString()
+            }
+            renderNote(note, time - note.timeStamp, isBase, note.judgementStart, debugText)
             if (!isBase && (note.showAsLN || Config.INSTANCE.showHolding)) { // hold LN, render end
                 renderNote(note, time - note.endTime, false,
                         note.judgementEnd)

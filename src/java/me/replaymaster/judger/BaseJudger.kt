@@ -33,6 +33,10 @@ abstract class BaseJudger(
         return false
     }
 
+    open fun calculateAccuracy(notes: List<Note>): Double {
+        return 0.0
+    }
+
     open fun onFindTarget(action: Note, target: Note) {
         action.offSetStart = (action.timeStamp - target.timeStamp).toInt()
         action.offSetEnd = (action.endTime - target.endTime).toInt()
@@ -80,6 +84,10 @@ abstract class BaseJudger(
     }
 
     override fun judge() {
+
+        replayModel.replayData.forEachIndexed { index, note -> note.index = index }
+        beatMap.notes.forEachIndexed { index, note -> note.index = index }
+
         for (action in replayModel.replayData) {
             val target = findTarget(action)
             if (target == null) {
@@ -87,8 +95,12 @@ abstract class BaseJudger(
                 continue
             }
             val judgement = getJudgement(abs(action.timeStamp - target.timeStamp).toDouble(), target, action)
-            action.judgementStart = judgement
-            target.judgementStart = judgement
+            if (action.judgementStart == -1) {
+                action.judgementStart = judgement
+            }
+            if (target.judgementStart == -1) {
+                target.judgementStart = judgement
+            }
             action.relatedActionOrNote = target
             target.relatedActionOrNote = action
             if (target.duration == 0L) {
@@ -101,16 +113,27 @@ abstract class BaseJudger(
             }
         }
 
+        replayModel.acc = calculateAccuracy(beatMap.notes)
+
         // for debug
+
         val count = hashMapOf<Int, Int>()
         for (note in beatMap.notes) {
             count[note.judgementStart] = count.getOrDefault(note.judgementStart, 0) + 1
+            if (replayModel.isScoreV2 && note.duration != 0L) {
+                count[note.judgementEnd] = count.getOrDefault(note.judgementEnd, 0) + 1
+            }
         }
+        val missJudgement = judgementWindow.lastIndex
+        count[-1] = count.getOrDefault(-1, 0) + count.getOrDefault(missJudgement, 0) + 1
+        count.remove(missJudgement)
+
         val judgementResult = count.entries
                 .sortedBy { if (it.key == -1) Int.MAX_VALUE else it.key }
                 .map { it.value }.toList()
         Main.judgementFromJudging = judgementResult
         debug("Judgement results: $judgementResult")
+        debug("Accuracy: ${replayModel.acc}")
     }
 
 }

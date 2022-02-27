@@ -96,6 +96,17 @@ object Main {
             val exportFile = parent.resolve("judgement_${replayFile.nameWithoutExtension}.json")
             logLine("judgement.export", exportFile.absolutePath)
             exportFile.writeText(Gson().toJson(replayModel.replayData.map { it.toSingleNote() }))
+
+            if (Config.INSTANCE.viewJudgementStatistics) {
+                val toolFile = File(Config.INSTANCE.viewJudgementStatisticsPath)
+                if (toolFile.isFile) {
+                    ProcessBuilder()
+                            .command(listOf(toolFile.absolutePath, exportFile.absolutePath))
+                            .start()
+                } else {
+                    debug("tools not found: ${toolFile.absolutePath}")
+                }
+            }
         }
 
         return Triple(beatMap, replayModel, delay)

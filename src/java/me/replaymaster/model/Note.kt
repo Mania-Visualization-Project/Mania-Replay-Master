@@ -19,6 +19,8 @@ class Note(
 
     var relatedActionOrNote: Note? = null
 
+    var index: Int = 0
+
     override fun compareTo(other: Note): Int {
         return timeStamp.compareTo(other.timeStamp)
     }

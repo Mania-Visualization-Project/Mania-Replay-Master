@@ -13,6 +13,8 @@ data class Config(
         var blockHeight: Int = 40,
         var framePerSecond: Int = 60,
         var isMalodyPE: Boolean = true,
+        var omScoreV2Adjust: Boolean = true,
+
         var judgementColor: List<String> = listOf(
                 "FFFFFF", // max, best, taiko_300
                 "FFD237", // 300, cool, taiko_100
@@ -27,6 +29,7 @@ data class Config(
         var taikoForegroundBlue: String = "88488FAD",
         var missColor: String = "FF0000",
         var longNoteColor: String = "646464",
+
         var debug: Boolean = false,
         var codec: String = "libx264",
         var outputDir: String = "out",
@@ -37,7 +40,10 @@ data class Config(
         var showTimestamp: Boolean = false,
         var ffmpegMaxProcessingSize: Int = 20,
         var maxEnabledDuration: Long = -1,
-        var exportJudgementResults: Boolean = false
+
+        var exportJudgementResults: Boolean = false,
+        var viewJudgementStatistics: Boolean = false,
+        var viewJudgementStatisticsPath: String = "judgementStatistics.exe"
 ) {
 
     companion object {
@@ -93,6 +99,7 @@ data class Config(
             # Advanced
             outputDir: 'out'
             exportJudgementResults: false
+            viewJudgementStatistics: false
             codec: libx264
             debug: false
         """.trimIndent()

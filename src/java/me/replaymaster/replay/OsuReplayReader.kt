@@ -34,21 +34,32 @@ object OsuReplayReader : IReplayReader {
     }
 
     // This algorithm may have a error less than 1 ms.
-    private fun getJudgement(od: Double, replayData: ReplayData, beatMapType: Int): DoubleArray {
+    private fun getJudgement(od: Double, replayData: ReplayData, beatMapType: Int, isScoreV2: Boolean): DoubleArray {
         return if (beatMapType == BeatMap.TYPE_MANIA) {
 
-            val modeRate = when {
-                Mods.has(replayData.replay.mods, Mods.HardRock) -> 1.0 / 1.4
-                Mods.has(replayData.replay.mods, Mods.Easy) -> 1.4
-                else -> 1.0
-            }
-            doubleArrayOf(16.0, 34.0, 67.0, 97.0, 121.0, 158.0).mapIndexed { index: Int, d: Double ->
-                var r = d
-                if (index != 0) {
-                    r += 3 * (10 - od)
+            if (isScoreV2) {
+                doubleArrayOf(
+                        mapDifficultyRange(od, 22.4, 19.4, 13.9, replayData.replay.mods),
+                        mapDifficultyRange(od, 64.0, 49.0, 34.0, replayData.replay.mods),
+                        mapDifficultyRange(od, 97.0, 82.0, 67.0, replayData.replay.mods),
+                        mapDifficultyRange(od, 127.0, 112.0, 97.0, replayData.replay.mods),
+                        mapDifficultyRange(od, 151.0, 136.0, 121.0, replayData.replay.mods),
+                        mapDifficultyRange(od, 188.0, 173.0, 158.0, replayData.replay.mods)
+                )
+            } else {
+                val modeRate = when {
+                    Mods.has(replayData.replay.mods, Mods.HardRock) -> 1.0 / 1.4
+                    Mods.has(replayData.replay.mods, Mods.Easy) -> 1.4
+                    else -> 1.0
                 }
-                (r * modeRate).toInt().toDouble()
-            }.toDoubleArray()
+                doubleArrayOf(16.0, 34.0, 67.0, 97.0, 121.0, 158.0).mapIndexed { index: Int, d: Double ->
+                    var r = d
+                    if (index != 0) {
+                        r += 3 * (10 - od)
+                    }
+                    (r * modeRate).toInt().toDouble()
+                }.toDoubleArray()
+            }
 
         } else {
             doubleArrayOf(
@@ -120,11 +131,12 @@ object OsuReplayReader : IReplayReader {
         }
         logLine("parse.replay.rate", rate)
 
-        val judgement = getJudgement(beatMap.od, replayData, beatMap.type)
+        val scoreV2 = replayData.replay.mods and (1 shl 29) != 0
+        val judgement = getJudgement(beatMap.od, replayData, beatMap.type, scoreV2)
         logLine("read.beatmap.judgement", judgement.contentToString())
 
         val mirror = replayData.replay.mods and (1 shl 30) != 0
-        val replayModel = ReplayModel(list, rate, mirror, judgement)
+        val replayModel = ReplayModel(list, rate, mirror, judgement, scoreV2)
         adjust(beatMap, replayModel)
 
 
