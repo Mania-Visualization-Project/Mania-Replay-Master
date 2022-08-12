@@ -213,7 +213,7 @@ class Render(
             val note = data[i]
             var debugText: String? = null
             if (isBase && Config.INSTANCE.showTimestamp) {
-                debugText = note.timeStamp.toString()
+                debugText = ((note.timeStamp - 1000) * replayModel.rate).toString()
             }
             renderNote(note, time - note.timeStamp, isBase, note.judgementStart, debugText)
             if (!isBase && (note.showAsLN || Config.INSTANCE.showHolding)) { // hold LN, render end

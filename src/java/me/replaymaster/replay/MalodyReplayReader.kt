@@ -12,6 +12,20 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.util.*
 
+data class MalodyRawHitEvent(
+        val timeStamp: Long,
+        val pressOrRelease: Int,
+        val column: Int
+) : Comparable<MalodyRawHitEvent> {
+    override fun compareTo(other: MalodyRawHitEvent): Int {
+        val timeCompare = timeStamp.compareTo(other.timeStamp)
+        if (timeCompare != 0) {
+            return timeCompare
+        }
+        return -pressOrRelease.compareTo(other.pressOrRelease)
+    }
+}
+
 object MalodyReplayReader : IReplayReader {
 
     override val extension = "mr"
@@ -32,9 +46,9 @@ object MalodyReplayReader : IReplayReader {
         }
     }
 
-    private fun getJudgement(judgeLevel: Int): DoubleArray {
+    private fun getJudgement(judgeLevel: Int, rate: Double): DoubleArray {
         return JUDGEMENT_TABLE[judgeLevel].map {
-            it + if (Config.INSTANCE.isMalodyPE) 9 else 0
+            (it + if (Config.INSTANCE.isMalodyPE) 9 else 0) / rate
         }.toDoubleArray()
     }
 
@@ -69,7 +83,7 @@ object MalodyReplayReader : IReplayReader {
             val judge = it.int32 // judge, 0-4: A-E
 
             logLine("read.beatmap.malody.judgement", ('A' + judge).toString() + if (Config.INSTANCE.isMalodyPE) " (PE)" else " (PC)")
-            val judgement = getJudgement(judge)
+            val judgement = getJudgement(judge, rate)
             logLine("read.beatmap.judgement", Arrays.toString(judgement))
 
             checkFormatValid(path, it.readMalodyString() == "mr data")
@@ -85,10 +99,22 @@ object MalodyReplayReader : IReplayReader {
             val currentHold = hashMapOf<Int, Note>()
             val notes = arrayListOf<Note>()
 
+            val malodyRawEvents = arrayListOf<MalodyRawHitEvent>()
             for (i in 0 until eventCount) {
                 val timeStamp = it.int32.toLong()
                 val pressOrRelease = it.readByte().toInt() and 0xFF // 1: press; 2: release
                 val column = it.readByte().toInt() and 0xFF
+                val data = MalodyRawHitEvent(timeStamp, pressOrRelease, column)
+                malodyRawEvents.add(data)
+            }
+
+            malodyRawEvents.sort()
+            for (i in 0..malodyRawEvents.lastIndex) {
+                val malodyRawEvent = malodyRawEvents[i]
+                val timeStamp = malodyRawEvent.timeStamp
+                val pressOrRelease = malodyRawEvent.pressOrRelease
+                val column = malodyRawEvent.column
+
                 if (timeStamp < 0) {
                     continue
                 }
@@ -97,18 +123,18 @@ object MalodyReplayReader : IReplayReader {
                 if (pressOrRelease == 1) {
                     // press
                     if (currentHold.containsKey(column)) {
-                        continue
+                        currentHold[column]!!.duration = timeStamp - currentHold[column]!!.timeStamp
+                        currentHold.remove(column)
                     }
                     val newNote = Note(timeStamp, column, 10000)
                     currentHold[column] = newNote
                     notes.add(newNote)
                 } else {
                     // release
-                    if (!currentHold.containsKey(column)) {
-                        continue
+                    if (currentHold.containsKey(column)) {
+                        currentHold[column]!!.duration = timeStamp - currentHold[column]!!.timeStamp
+                        currentHold.remove(column)
                     }
-                    currentHold[column]!!.duration = timeStamp - currentHold[column]!!.timeStamp
-                    currentHold.remove(column)
                 }
             }
 
