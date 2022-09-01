@@ -7,14 +7,16 @@
 
 [中文版](README.md)
 
-ManiaReplayMaster is a visualization tool for falling music games (Mania) replay. It can attach hit positions to the map, mark judgement of the note, and renderer an video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, help to learn the play skills, analyze the comprehensive strength of a player, and judge if a player cheated.
+ManiaReplayMaster is a visualization tool for Vertical Scrolling Rhythm Game (VSRG or mania) replays. It can attach hit positions to the map, mark judgement of the notes, and renderer an video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, help to learn the play skills, analyze the comprehensive strength of a player, and judge if a player cheated.
 
 Supported games: 
 - osu!mania
 - osu!taiko
 - Malody key mode (Version 4.x)
 
-Online rendering website: http://keytoix.vip/mania/
+Online rendering website: https://keytoix.vip/mania/
+
+**PR is welcome!!**
 
 ## Screenshot
 
@@ -37,7 +39,7 @@ Demo: https://www.bilibili.com/video/av84322571/
 
 ### Method 1: online rendering
 
-http://keytoix.vip/mania/
+https://keytoix.vip/mania/
 
 ### Method 2: local rendering
 
@@ -45,7 +47,7 @@ First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-M
 
 Second, please ensure that you have installed Java (at least version 8.0)
 
-Last, double click `ManiaReplayMaster.bat`, enter beatmap path, replay path according to the hint.
+Last, double click `ManiaReplayMaster.bat`, enter beatmap path, replay path according to the prompt.
 
 ## LICENSE
 
