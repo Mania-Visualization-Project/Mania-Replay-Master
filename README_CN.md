@@ -3,7 +3,7 @@
 [![](https://img.shields.io/github/v/release/Keytoyze/Mania-Replay-Master?color=blue)](https://github.com/Keytoyze/Mania-Replay-Master/releases/latest)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fkeytoix.vip%2Fmania%2Fapi%2Fcount)](https://github.com/Keytoyze/Mania-Replay-Master/)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fresume.keytoix.vip%2Fassets%2Frenderer.json)](https://keytoix.vip/mania/)
-[![](https://img.shields.io/github/license/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/LICENSE)
+[![](https://img.shields.io/badge/dynamic/json?color=ff69b4&label=bilibili&query=data.stat.view&url=https://api.bilibili.com/x/web-interface/view?bvid=BV1w7411i7Ps)](https://www.bilibili.com/video/BV1w7411i7Ps)
 
 [English version](README_EN.md)
 
