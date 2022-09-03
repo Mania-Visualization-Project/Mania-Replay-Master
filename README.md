@@ -1,24 +1,26 @@
 # Mania Replay Master
 
 [![](https://img.shields.io/github/v/release/Keytoyze/Mania-Replay-Master?color=blue)](https://github.com/Keytoyze/Mania-Replay-Master/releases/latest)
-[![](https://img.shields.io/github/downloads/Keytoyze/Mania-Replay-Master/total)](https://github.com/Keytoyze/Mania-Replay-Master/releases)
-[![](https://img.shields.io/github/issues-closed/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/issues)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fkeytoix.vip%2Fmania%2Fapi%2Fcount)](https://github.com/Keytoyze/Mania-Replay-Master/)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fresume.keytoix.vip%2Fassets%2Frenderer.json)](https://keytoix.vip/mania/)
 [![](https://img.shields.io/github/license/Keytoyze/Mania-Replay-Master)](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/LICENSE)
 
-[English version](README_EN.md)
+[中文版](README_CN.md)
 
-ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。它可在谱面中加上打击位置，并标注音符判定情况，最终渲染成视频文件输出。项目通过可视化某一游玩记录的判定细节，以此达到提升观赏效果、学习糊法、分析玩家的综合实力、判断是否为科技等目的。
+ManiaReplayMaster is a visualization tool for Vertical Scrolling Rhythm Game (VSRG or mania) replays. It can attach hit positions to the map, mark judgement of the notes, and renderer an video. By visualizing the judgment details of a replay record, the project aims to improve the viewing effect, help to learn the play skills, analyze the comprehensive strength of a player, and judge if a player cheated.
 
-支持游戏：
+Supported games: 
 - osu!mania
 - osu!taiko
-- Malody key mode (4.x 版本)
+- Malody key mode (Version 4.x)
 
-在线渲染网站：http://keytoix.vip/mania/
+Online rendering website: https://keytoix.vip/mania/
 
-## 截图
+**PR is welcome!!**
 
-演示: https://www.bilibili.com/video/av84322571/
+## Screenshot
+
+Demo: https://www.bilibili.com/video/av84322571/
 
 - Lynessa's Jack Collection [Uetso Shi - Firmament Castle Velier]
 
@@ -33,19 +35,19 @@ ManiaReplayMaster是一个下落式音游（Mania）回放的可视化工具。�
 ![](https://github.com/Keytoyze/Mania-Replay-Master/blob/master/screenshot/image2.png?raw=true)
 
 
-## 使用方法
+## Usage
 
-### 方法一、在线渲染
+### Method 1: online rendering
 
-http://keytoix.vip/mania/
+https://keytoix.vip/mania/
 
-### 方法二、本地渲染
+### Method 2: local rendering
 
-首先点击[此处](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.3.2/ManiaReplayMaster.v2.3.2.zip)下载工具包。
+First click [here](https://github.com/Mania-Visualization-Project/Mania-Replay-Master/releases/download/v2.4.0/ManiaReplayMaster.v2.4.0.zip) to download the tool kit.
 
-其次，确保已经成功安装 Java 8.0 以上版本。
+Second, please ensure that you have installed Java (at least version 8.0)
 
-最后，双击`ManiaReplayMaster.bat`批处理脚本，按照提示输入谱面路径、回放路径。
+Last, double click `ManiaReplayMaster.bat`, enter beatmap path, replay path according to the prompt.
 
 ## LICENSE
 
