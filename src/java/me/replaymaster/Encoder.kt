@@ -86,7 +86,8 @@ class Encoder(
                 "-map", "[video]",
                 "-map", "[audio]",
                 "-c:v", Config.INSTANCE.codec,
-                "-preset", "ultrafast",
+                "-preset:v", Config.INSTANCE.codecPreset,
+                "-profile:v", Config.INSTANCE.codecProfile,
                 "-benchmark",
                 outFile.absolutePath
         ))
@@ -140,7 +141,8 @@ class Encoder(
         }
         command.addAll(arrayListOf(
                 "-c:v", Config.INSTANCE.codec,
-                "-preset", "ultrafast",
+                "-preset:v", Config.INSTANCE.codecPreset,
+                "-profile:v", Config.INSTANCE.codecProfile,
                 "-benchmark",
                 out.absolutePath
         ))
