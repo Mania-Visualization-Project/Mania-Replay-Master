@@ -32,6 +32,8 @@ data class Config(
 
         var debug: Boolean = false,
         var codec: String = "libx264",
+        var codecPreset: String = "ultrafast",
+        var codecProfile: String = "unknown",
         var outputDir: String = "out",
         var isServer: Boolean = false,
         var isDesktop: Boolean = false,
@@ -100,7 +102,10 @@ data class Config(
             outputDir: 'out'
             exportJudgementResults: false
             viewJudgementStatistics: false
+            # if you not familiar with ffmpeg, please don't change it
             codec: libx264
+            codecPreset: ultrafast
+            codecProfile: unknown
             debug: false
         """.trimIndent()
     }
